@@ -16,6 +16,7 @@ spec:
   zookeeper:
     size: 1
   bookie:
+    storageClassName: hostpath
     size: 1
   autoRecovery:
     size: 1

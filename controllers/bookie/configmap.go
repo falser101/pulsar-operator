@@ -20,9 +20,19 @@ func MakeConfigMap(c *cachev1alpha1.PulsarCluster) *v1.ConfigMap {
 			Namespace: c.Namespace,
 		},
 		Data: map[string]string{
-			"BOOKIE_MEM":         MemData,
-			"zkServers":          zookeeper.MakeServiceName(c),
-			"statsProviderClass": StatsProviderClass,
+			"BOOKIE_MEM":                MemData,
+			"PULSAR_GC":                 PulsarGC,
+			"PULSAR_MEM":                PulsarMem,
+			"autoRecoveryDaemonEnabled": "false",
+			"httpServerEnabled":         "true",
+			"httpServerPort":            "8000",
+			"journalDirectories":        "/pulsar/data/bookkeeper/journal",
+			"journalMaxBackups":         "0",
+			"ledgerDirectories":         "/pulsar/data/bookkeeper/ledgers",
+			"zkServers":                 zookeeper.MakeServiceName(c) + ":2181",
+			"zkLedgersRootPath":         "/ledgers",
+			"statsProviderClass":        StatsProviderClass,
+			"useHostNameAsBookieID":     "true",
 		},
 	}
 }
