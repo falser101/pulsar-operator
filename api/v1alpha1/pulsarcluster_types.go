@@ -49,6 +49,10 @@ type PulsarClusterSpec struct {
 	// Manager defines the desired state of Manager
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Manager Manager `json:"manager,omitempty"`
+
+	// Prometheus defines the desired state of Prometheus
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	Monitor Monitor `json:"monitor,omitempty"`
 }
 
 func (s *PulsarClusterSpec) SetDefault(c *PulsarCluster) bool {
@@ -66,6 +70,9 @@ func (s *PulsarClusterSpec) SetDefault(c *PulsarCluster) bool {
 		changed = true
 	}
 	if s.Manager.SetDefault(c) {
+		changed = true
+	}
+	if s.Monitor.SetDefault(c) {
 		changed = true
 	}
 	return changed

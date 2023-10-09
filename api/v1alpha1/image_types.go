@@ -101,8 +101,21 @@ func (c *ContainerImage) SetDefault(cluster *PulsarCluster, component string) bo
 			cluster.Spec.Manager.Image.PullPolicy = corev1.PullIfNotPresent
 			changed = true
 		}
-
+	case PrometheusComponent:
+		if cluster.Spec.Monitor.Prometheus.Image.Repository == "" {
+			cluster.Spec.Monitor.Prometheus.Image.Repository = DefaultPrometheusContainerRepository
+			changed = true
+		}
+		if cluster.Spec.Monitor.Prometheus.Image.Tag == "" {
+			cluster.Spec.Monitor.Prometheus.Image.Tag = DefaultPrometheusContainerVersion
+			changed = true
+		}
+		if cluster.Spec.Monitor.Prometheus.Image.PullPolicy == "" {
+			cluster.Spec.Monitor.Prometheus.Image.PullPolicy = corev1.PullIfNotPresent
+			changed = true
+		}
 	}
+
 	return changed
 }
 

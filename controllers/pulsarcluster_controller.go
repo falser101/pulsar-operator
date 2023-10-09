@@ -63,6 +63,7 @@ type PulsarClusterReconciler struct {
 //+kubebuilder:rbac:groups=cache.example.com,resources=pulsarclusters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=cache.example.com,resources=pulsarclusters/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=cache.example.com,resources=pulsarclusters/finalizers,verbs=update
+// +kubebuilder:resource:path=foos,scope=Cluster
 //+kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
@@ -119,6 +120,7 @@ func (r *PulsarClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		r.reconcileAutoRecovery,
 		r.reconcileBroker,
 		r.reconcileManager,
+		r.reconcileMonitor,
 		r.reconcilePulsarCluster,
 	} {
 		if err := fun(pulsarCluster); err != nil {

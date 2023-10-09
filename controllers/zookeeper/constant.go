@@ -2,10 +2,10 @@ package zookeeper
 
 const (
 	// PulsarMemData Mem
-	PulsarMemData = "\" -Xms100m -Xmx256m \""
+	PulsarMemData = " -Xms100m -Xmx256m "
 
 	// PulsarGCData GC
-	PulsarGCData = "\" -XX:+UseG1GC -XX:MaxGCPauseMillis=10\""
+	PulsarGCData = " -XX:+UseG1GC -XX:MaxGCPauseMillis=10"
 
 	// ContainerZookeeperServerList Container zookeeper server list env key
 	ContainerZookeeperServerList = "ZOOKEEPER_SERVERS"

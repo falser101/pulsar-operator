@@ -45,8 +45,22 @@ const (
 	// AutoRecoveryComponent autoRecovery
 	AutoRecoveryComponent = "autoRecovery"
 
+	PrometheusComponent = "prometheus"
+
 	// ManagerComponent component
 	ManagerComponent = "manager"
+
+	// MonitorComponent component
+	MonitorComponent = "monitor"
+)
+
+// monitor child component
+const (
+	// MonitorPrometheusComponent prometheus component
+	MonitorPrometheusComponent = "monitor-prometheus"
+
+	// MonitorGrafanaComponent grafana component
+	MonitorGrafanaComponent = "monitor-grafana"
 )
 
 const (
@@ -62,8 +76,18 @@ const (
 	// DefaultPulsarManagerContainerVersion is
 	DefaultPulsarManagerContainerVersion = "v10.0.0.1"
 
+	// DefaultPrometheusContainerRepository prometheus
+	DefaultPrometheusContainerRepository = "prom/prometheus"
+
+	// DefaultPrometheusContainerVersion version
+	DefaultPrometheusContainerVersion = "v2.17.2"
+
 	// DefaultContainerPolicy is the default container pull policy used
 	DefaultContainerPolicy = "Always"
+
+	MonitorGrafanaImage = ""
+
+	MonitorPrometheusImage = ""
 )
 
 // Labels
@@ -142,6 +166,8 @@ const (
 
 	// LedgersStorageDefaultCapacity ledgers storage default capacity
 	LedgersStorageDefaultCapacity = 10
+
+	PrometheusStorageDefaultCapacity = 10
 )
 
 const (
