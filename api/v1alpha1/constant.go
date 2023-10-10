@@ -45,8 +45,6 @@ const (
 	// AutoRecoveryComponent autoRecovery
 	AutoRecoveryComponent = "autoRecovery"
 
-	PrometheusComponent = "prometheus"
-
 	// ManagerComponent component
 	ManagerComponent = "manager"
 
@@ -85,9 +83,9 @@ const (
 	// DefaultContainerPolicy is the default container pull policy used
 	DefaultContainerPolicy = "Always"
 
-	MonitorGrafanaImage = ""
+	DefaultMonitorGrafanaContainerRepository = "tlq-cn-grafana"
 
-	MonitorPrometheusImage = ""
+	DefaultMonitorGrafanaContainerTag = "v10.0.0.1"
 )
 
 // Labels
@@ -168,6 +166,12 @@ const (
 	LedgersStorageDefaultCapacity = 10
 
 	PrometheusStorageDefaultCapacity = 10
+	GrafanaStorageDefaultCapacity    = 10
+)
+
+const (
+	GrafanaDefaultAdminUser     = "test"
+	GrafanaDefaultAdminPassword = "test"
 )
 
 const (

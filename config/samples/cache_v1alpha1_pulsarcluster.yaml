@@ -27,4 +27,11 @@ spec:
     prometheus:
       storageClassName: local-path
       size: 1
+    grafana:
+      storageClassName: local-path
+      size: 1
+      security:
+        adminUser: test
+        adminPassword: test
+
 

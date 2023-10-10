@@ -35,23 +35,18 @@ type PulsarClusterSpec struct {
 	Broker Broker `json:"broker,omitempty"`
 
 	// Zookeeper defines the desired state of Zookeeper
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Zookeeper Zookeeper `json:"zookeeper,omitempty"`
 
 	// Bookie defines the desired state of Bookie
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Bookie Bookie `json:"bookie,omitempty"`
 
 	// AutoRecovery defines the desired state of AutoRecovery
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	AutoRecovery AutoRecovery `json:"autoRecovery,omitempty"`
 
 	// Manager defines the desired state of Manager
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Manager Manager `json:"manager,omitempty"`
 
-	// Prometheus defines the desired state of Prometheus
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Monitor defines the desired state of Monitor
 	Monitor Monitor `json:"monitor,omitempty"`
 }
 

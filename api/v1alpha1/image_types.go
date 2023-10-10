@@ -101,7 +101,7 @@ func (c *ContainerImage) SetDefault(cluster *PulsarCluster, component string) bo
 			cluster.Spec.Manager.Image.PullPolicy = corev1.PullIfNotPresent
 			changed = true
 		}
-	case PrometheusComponent:
+	case MonitorPrometheusComponent:
 		if cluster.Spec.Monitor.Prometheus.Image.Repository == "" {
 			cluster.Spec.Monitor.Prometheus.Image.Repository = DefaultPrometheusContainerRepository
 			changed = true
@@ -112,6 +112,19 @@ func (c *ContainerImage) SetDefault(cluster *PulsarCluster, component string) bo
 		}
 		if cluster.Spec.Monitor.Prometheus.Image.PullPolicy == "" {
 			cluster.Spec.Monitor.Prometheus.Image.PullPolicy = corev1.PullIfNotPresent
+			changed = true
+		}
+	case MonitorGrafanaComponent:
+		if cluster.Spec.Monitor.Grafana.Image.Repository == "" {
+			cluster.Spec.Monitor.Grafana.Image.Repository = DefaultMonitorGrafanaContainerRepository
+			changed = true
+		}
+		if cluster.Spec.Monitor.Grafana.Image.Tag == "" {
+			cluster.Spec.Monitor.Grafana.Image.Tag = DefaultMonitorGrafanaContainerTag
+			changed = true
+		}
+		if cluster.Spec.Monitor.Grafana.Image.PullPolicy == "" {
+			cluster.Spec.Monitor.Grafana.Image.PullPolicy = corev1.PullIfNotPresent
 			changed = true
 		}
 	}

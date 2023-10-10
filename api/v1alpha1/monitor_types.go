@@ -11,5 +11,8 @@ func (m *Monitor) SetDefault(c *PulsarCluster) bool {
 	if m.Prometheus.SetDefault(c) {
 		changed = true
 	}
+	if m.Grafana.SetDefault(c) {
+		changed = true
+	}
 	return changed
 }

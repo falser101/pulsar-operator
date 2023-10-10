@@ -174,6 +174,9 @@ func (r *PulsarClusterReconciler) reconcileMonitorPrometheusService(c *cachev1al
 
 func (r *PulsarClusterReconciler) reconcileMonitorGrafana(c *cachev1alpha1.PulsarCluster) error {
 	for _, fun := range []reconcileFunc{
+		r.reconcileMonitorGrafanaConfigMap,
+		r.reconcileManagerGrafanaSecret,
+		r.reconcileManagerGrafanaPVC,
 		r.reconcileMonitorGrafanaDeployment,
 		r.reconcileMonitorGrafanaService,
 	} {
@@ -182,6 +185,70 @@ func (r *PulsarClusterReconciler) reconcileMonitorGrafana(c *cachev1alpha1.Pulsa
 		}
 	}
 	return nil
+}
+
+func (r *PulsarClusterReconciler) reconcileMonitorGrafanaConfigMap(c *cachev1alpha1.PulsarCluster) (err error) {
+	cmCreate := grafana.MakeConfigMap(c)
+	cmCur := &v1.ConfigMap{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      cmCreate.Name,
+		Namespace: cmCreate.Namespace,
+	}, cmCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, cmCreate, r.scheme); err != nil {
+			return err
+		}
+
+		if err = r.client.Create(context.TODO(), cmCreate); err == nil {
+			r.log.Info("Create pulsar monitor grafana configmap success",
+				"ConfigMap.Namespace", c.Namespace,
+				"ConfigMap.Name", cmCreate.GetName())
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileManagerGrafanaSecret(c *cachev1alpha1.PulsarCluster) (err error) {
+	secCreate := grafana.MakeSecret(c)
+	secCur := &v1.Secret{}
+	if err = r.client.Get(context.TODO(), types.NamespacedName{
+		Namespace: secCreate.Namespace,
+		Name:      secCreate.Name,
+	}, secCur); err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, secCreate, r.scheme); err != nil {
+			return err
+		}
+
+		if err = r.client.Create(context.TODO(), secCreate); err == nil {
+			r.log.Info("Create pulsar monitor grafana secret success",
+				"Secret.Namespace", c.Namespace,
+				"Secret.Name", secCreate.GetName())
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileManagerGrafanaPVC(c *cachev1alpha1.PulsarCluster) (err error) {
+	if c.Spec.Monitor.Grafana.StorageClassName == "" {
+		return
+	}
+	pvcCreate := grafana.MakePVC(c)
+	pvcCur := &v1.PersistentVolumeClaim{}
+	if err = r.client.Get(context.TODO(), types.NamespacedName{
+		Namespace: pvcCreate.Namespace,
+		Name:      pvcCreate.Name,
+	}, pvcCur); err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, pvcCreate, r.scheme); err != nil {
+			return err
+		}
+
+		if err = r.client.Create(context.TODO(), pvcCreate); err == nil {
+			r.log.Info("Create pulsar monitor grafana pvc success",
+				"PVC.Namespace", c.Namespace,
+				"PVC.Name", pvcCreate.GetName())
+		}
+	}
+	return
 }
 
 func (r *PulsarClusterReconciler) reconcileMonitorGrafanaDeployment(c *cachev1alpha1.PulsarCluster) (err error) {

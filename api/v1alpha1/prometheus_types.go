@@ -25,7 +25,7 @@ type Prometheus struct {
 func (p *Prometheus) SetDefault(c *PulsarCluster) bool {
 	changed := false
 
-	if p.Image.SetDefault(c, PrometheusComponent) {
+	if p.Image.SetDefault(c, MonitorPrometheusComponent) {
 		changed = true
 	}
 
@@ -34,7 +34,7 @@ func (p *Prometheus) SetDefault(c *PulsarCluster) bool {
 		changed = true
 	}
 
-	if p.Pod.SetDefault(c, PrometheusComponent) {
+	if p.Pod.SetDefault(c, MonitorPrometheusComponent) {
 		changed = true
 	}
 
