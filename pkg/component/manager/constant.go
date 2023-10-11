@@ -1,6 +1,10 @@
 package manager
 
 const (
+	ComponentName = "init-manager-job"
+)
+
+const (
 	BackendEntrypointKey = "backend_entrypoint.sh"
 	EntrypointKey        = "entrypoint.sh"
 

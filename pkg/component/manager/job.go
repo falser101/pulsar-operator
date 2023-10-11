@@ -8,10 +8,6 @@ import (
 	"pulsar-operator/pkg/api/v1alpha1"
 )
 
-const (
-	ComponentName = "init-manager-job"
-)
-
 func MakeJob(c *v1alpha1.PulsarCluster) *batchv1.Job {
 	return &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
