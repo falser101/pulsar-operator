@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"pulsar-operator/pkg/api/v1alpha1"
+	"pulsar-operator/pkg/component/bookie"
 	"pulsar-operator/pkg/component/metadata"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -195,6 +196,35 @@ func (r *PulsarClusterReconciler) reconcilePulsarClusterPhase(c *v1alpha1.Pulsar
 			r.log.Info("start pulsar cluster success",
 				"PulsarCluster.Namespace", c.Namespace,
 				"PulsarCluster.Name", c.Name)
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileBookieJob(c *v1alpha1.PulsarCluster) (err error) {
+	jobCreate := bookie.MakeJob(c)
+	jobCur := &batchv1.Job{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      jobCreate.Name,
+		Namespace: jobCreate.Namespace,
+	}, jobCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, jobCreate, r.scheme); err != nil {
+			return err
+		}
+
+		if err = r.client.Create(context.TODO(), jobCreate); err == nil {
+			r.log.Info("Start init pulsar bookie job",
+				"Job.Namespace", jobCreate.Namespace,
+				"Job.Name", jobCreate.Name)
+		}
+
+	} else if err == nil && jobCur.Status.Succeeded == 1 {
+		// Init pulsar cluster success
+		if err = r.client.Status().Update(context.TODO(), c); err == nil {
+			r.log.Info("Init pulsar bookie success",
+				"Job.Namespace", c.Namespace,
+				"Job.Name", c.Name)
 		}
 	}
 	return

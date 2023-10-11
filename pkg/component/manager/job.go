@@ -63,10 +63,10 @@ func makeJobInitContainer(c *v1alpha1.PulsarCluster) corev1.Container {
 
 func makeJobInitContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
 	return []string{
-		fmt.Sprintf("pmServiceNumber=\"$(nslookup -timeout=10 %s | grep Name | wc -l)\"; until [ ${pmServiceNumber} -ge 1 ]; do\n"+
+		fmt.Sprintf("export CSRF_TOKEN=$(curl http://%s:7750/pulsar-manager/csrf-token); until [ ${#CSRF_TOKEN} -ge 1 ]; do\n"+
 			"            echo \"Pulsar Manager cluster %s isn't ready yet ... check in 10 seconds ...\";\n"+
 			"            sleep 10;\n"+
-			"            pmServiceNumber=\"$(nslookup -timeout=10 %s | grep Name | wc -l)\";\n"+
+			"            export CSRF_TOKEN=$(curl http://%s:7750/pulsar-manager/csrf-token);\n"+
 			"          done; sleep 5; echo \"Pulsar Manager cluster is ready\";", MakeServiceName(c), c.Name, MakeServiceName(c)),
 	}
 }
