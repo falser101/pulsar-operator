@@ -86,9 +86,9 @@ func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 
 func makeInitContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	return v1.Container{
-		Name:            "bookie-metaformat",
-		Image:           c.Spec.AutoRecovery.Image.GenerateImage(),
-		ImagePullPolicy: c.Spec.AutoRecovery.Image.PullPolicy,
+		Name:            "bookie-init",
+		Image:           c.Spec.Bookie.Image.GenerateImage(),
+		ImagePullPolicy: c.Spec.Bookie.Image.PullPolicy,
 		Command:         makeInitContainerCommand(),
 		Args:            makeInitContainerCommandArgs(),
 		EnvFrom:         makeInitContainerEnvFrom(c),
@@ -104,8 +104,9 @@ func makeInitContainerCommand() []string {
 
 func makeInitContainerCommandArgs() []string {
 	return []string{
-		"bin/apply-config-from-env.py conf/bookkeeper.conf && " +
-			"bin/bookkeeper shell metaformat --nonInteractive || true;",
+		`set -e; bin/apply-config-from-env.py conf/bookkeeper.conf;until bin/bookkeeper shell whatisinstanceid; do
+            sleep 3;
+          done;`,
 	}
 }
 

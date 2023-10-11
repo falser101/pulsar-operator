@@ -18,6 +18,7 @@ func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.PulsarCluster) err
 
 	for _, fun := range []reconcileFunc{
 		r.reconcileBookieConfigMap,
+		r.reconcileBookieJob,
 		r.reconcileBookieStatefulSet,
 		r.reconcileBookieService,
 	} {
