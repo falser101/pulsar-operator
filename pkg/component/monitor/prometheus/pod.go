@@ -147,6 +147,12 @@ func makeVolumes(c *v1alpha1.PulsarCluster) []v1.Volume {
 			Name: ClientTokenName,
 			VolumeSource: v1.VolumeSource{Secret: &v1.SecretVolumeSource{
 				SecretName: fmt.Sprintf("%s-token-admin", c.Name),
+				Items: []v1.KeyToPath{
+					{
+						Key:  "TOKEN",
+						Path: "client/token",
+					},
+				},
 			}},
 		},
 	}
