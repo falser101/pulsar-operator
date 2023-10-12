@@ -46,7 +46,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 
 func makeContainerCommand() []string {
 	return []string{
-		"sh",
+		"bash",
 		"-c",
 	}
 }
@@ -54,7 +54,6 @@ func makeContainerCommand() []string {
 func makeContainerCommandArgs() []string {
 	return []string{
 		"bin/apply-config-from-env.py conf/bookkeeper.conf && " +
-			"bin/apply-config-from-env.py conf/pulsar_env.sh && " +
 			"bin/pulsar bookie",
 	}
 }
@@ -70,8 +69,38 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 }
 
 func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
-	env := make([]v1.EnvVar, 0)
-	return env
+	return []v1.EnvVar{
+		{
+			Name: "POD_NAME",
+			ValueFrom: &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					APIVersion: "v1",
+					FieldPath:  "metadata.name",
+				},
+			},
+		},
+		{
+			Name: "POD_NAMESPACE",
+			ValueFrom: &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					APIVersion: "v1",
+					FieldPath:  "metadata.namespace",
+				},
+			},
+		},
+		{
+			Name:  "VOLUME_NAME",
+			Value: makeJournalDataVolumeName(c),
+		},
+		{
+			Name:  "BOOKIE_PORT",
+			Value: "3181",
+		},
+		{
+			Name:  "BOOKIE_RACK_AWARE_ENABLED",
+			Value: "true",
+		},
+	}
 }
 
 func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
