@@ -58,6 +58,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperStatefulSet(c *cachev1alpha1
 		Namespace: ssCreate.Namespace,
 	}, ssCur)
 	if err != nil && errors.IsNotFound(err) {
+
 		if err = controllerutil.SetControllerReference(c, ssCreate, r.scheme); err != nil {
 			return err
 		}

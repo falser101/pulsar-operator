@@ -167,6 +167,7 @@ const (
 
 	PrometheusStorageDefaultCapacity = 10
 	GrafanaStorageDefaultCapacity    = 10
+	ZookeeperStorageDefaultCapacity  = 10
 )
 
 const (

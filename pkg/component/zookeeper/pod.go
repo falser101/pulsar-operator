@@ -36,18 +36,15 @@ func MakePodDisruptionBudgetName(c *v1alpha1.PulsarCluster) string {
 }
 
 func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
-	return v1.PodSpec{
+	s := v1.PodSpec{
 		Affinity:   c.Spec.Zookeeper.Pod.Affinity,
 		Containers: []v1.Container{makeContainer(c)},
-		Volumes: []v1.Volume{
-			{
-				Name: ContainerDataVolumeName,
-				VolumeSource: v1.VolumeSource{
-					EmptyDir: &v1.EmptyDirVolumeSource{},
-				},
-			},
-		},
 	}
+
+	if isUseEmptyDirVolume(c) {
+		s.Volumes = makeEmptyDirVolume(c)
+	}
+	return s
 }
 
 func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
@@ -75,7 +72,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 		},
 
 		VolumeMounts: []v1.VolumeMount{
-			{Name: ContainerDataVolumeName, MountPath: ContainerDataPath},
+			{Name: makeDataName(c), MountPath: ContainerDataPath},
 		},
 	}
 }
@@ -130,4 +127,8 @@ func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 
 	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
 	return froms
+}
+
+func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
+	return c.Spec.Zookeeper.StorageClassName == ""
 }

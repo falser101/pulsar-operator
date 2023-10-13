@@ -7,15 +7,12 @@ type Security struct {
 
 // Grafana defines the desired state of Grafana
 type Grafana struct {
-	// Image is the  container image. default is apachepulsar/pulsar-all:latest
+	// Image is the  container image. default is
 	Image ContainerImage `json:"image,omitempty"`
 
 	// Labels specifies the labels to attach to pods the operator creates for
-	// the broker cluster.
+	// the grafana.
 	Labels map[string]string `json:"labels,omitempty"`
-
-	// Size (DEPRECATED) is the expected size of the broker cluster.
-	Size int32 `json:"size,omitempty"`
 
 	// Pod defines the policy to create pod for the broker cluster.
 	//
@@ -31,11 +28,6 @@ func (g *Grafana) SetDefault(c *PulsarCluster) bool {
 	changed := false
 
 	if g.Image.SetDefault(c, MonitorGrafanaComponent) {
-		changed = true
-	}
-
-	if g.Size == 0 {
-		g.Size = 1
 		changed = true
 	}
 

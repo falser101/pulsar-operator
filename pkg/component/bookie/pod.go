@@ -134,6 +134,7 @@ func makeInitContainerCommand() []string {
 func makeInitContainerCommandArgs() []string {
 	return []string{
 		`set -e; bin/apply-config-from-env.py conf/bookkeeper.conf;until bin/bookkeeper shell whatisinstanceid; do
+            echo "bookie not init"
             sleep 3;
           done;`,
 	}

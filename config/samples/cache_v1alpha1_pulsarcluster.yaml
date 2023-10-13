@@ -1,4 +1,4 @@
-apiVersion: cache.example.com/v1alpha1
+apiVersion: pulsar.apache.org/v1alpha1
 kind: PulsarCluster
 metadata:
   labels:
@@ -14,7 +14,8 @@ spec:
   broker:
     size: 1
   zookeeper:
-    size: 1
+    storageClassName: local-path
+    size: 3
   bookie:
     storageClassName: local-path
     size: 1
@@ -26,10 +27,8 @@ spec:
     enable: true
     prometheus:
       storageClassName: local-path
-      size: 1
     grafana:
       storageClassName: local-path
-      size: 1
       security:
         adminUser: test
         adminPassword: test

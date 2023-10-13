@@ -12,7 +12,7 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileBroker(c *v1alpha1.PulsarCluster) error {
-	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
+	if !r.isBookieRunning(c) {
 		return nil
 	}
 
