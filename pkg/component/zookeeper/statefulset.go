@@ -38,7 +38,7 @@ func makeStatefulSetPodNameList(c *v1alpha1.PulsarCluster) []string {
 }
 
 func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
-	return appsv1.StatefulSetSpec{
+	s := appsv1.StatefulSetSpec{
 		ServiceName: MakeServiceName(c),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
@@ -50,6 +50,10 @@ func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 			Type: appsv1.RollingUpdateStatefulSetStrategyType,
 		},
 	}
+	if !isUseEmptyDirVolume(c) {
+		s.VolumeClaimTemplates = makeVolumeClaimTemplates(c)
+	}
+	return s
 }
 
 func makeStatefulSetPodTemplate(c *v1alpha1.PulsarCluster) v1.PodTemplateSpec {

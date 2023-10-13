@@ -15,7 +15,9 @@ type Zookeeper struct {
 	// Pod defines the policy to create pod for the broker cluster.
 	//
 	// Updating the pod does not take effect on any existing pods.
-	Pod PodPolicy `json:"pod,omitempty"`
+	Pod              PodPolicy `json:"pod,omitempty"`
+	StorageClassName string    `json:"storageClassName,omitempty"`
+	StorageCapacity  int32     `json:"storageCapacity,omitempty"`
 }
 
 func (z *Zookeeper) SetDefault(c *PulsarCluster) bool {
@@ -32,6 +34,10 @@ func (z *Zookeeper) SetDefault(c *PulsarCluster) bool {
 
 	if z.Pod.SetDefault(c, ZookeeperComponent) {
 		changed = true
+	}
+
+	if z.StorageClassName != "" && z.StorageCapacity == 0 {
+		z.StorageCapacity = ZookeeperStorageDefaultCapacity
 	}
 	return changed
 }

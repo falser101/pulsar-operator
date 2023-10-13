@@ -61,9 +61,9 @@ type PulsarClusterReconciler struct {
 	log      logr.Logger
 }
 
-//+kubebuilder:rbac:groups=cache.example.com,resources=pulsarclusters,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=cache.example.com,resources=pulsarclusters/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=cache.example.com,resources=pulsarclusters/finalizers,verbs=update
+//+kubebuilder:rbac:groups=pulsar.apache.org,resources=pulsarclusters,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=pulsar.apache.org,resources=pulsarclusters/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=pulsar.apache.org,resources=pulsarclusters/finalizers,verbs=update
 // +kubebuilder:resource:path=foos,scope=Cluster
 //+kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete

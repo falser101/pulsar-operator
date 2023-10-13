@@ -24,12 +24,13 @@ func MakeStatefulSet(c *v1alpha1.PulsarCluster) *appsv1.StatefulSet {
 }
 
 func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
+	replicas := int32(1)
 	spec := appsv1.StatefulSetSpec{
 		ServiceName: MakeServiceName(c),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeAllLabels(c, v1alpha1.MonitorComponent, v1alpha1.MonitorPrometheusComponent),
 		},
-		Replicas:            &c.Spec.Monitor.Prometheus.Size,
+		Replicas:            &replicas,
 		Template:            makeStatefulSetPodTemplate(c),
 		PodManagementPolicy: appsv1.OrderedReadyPodManagement,
 		UpdateStrategy: appsv1.StatefulSetUpdateStrategy{

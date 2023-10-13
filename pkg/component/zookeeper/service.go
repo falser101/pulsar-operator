@@ -21,9 +21,9 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 			Annotations: ServiceAnnotations,
 		},
 		Spec: v1.ServiceSpec{
-			Ports:     makeServicePorts(c),
-			ClusterIP: v1.ClusterIPNone,
-			Selector:  v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
+			Ports:    makeServicePorts(c),
+			Type:     v1.ServiceTypeNodePort,
+			Selector: v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 		},
 	}
 }
@@ -34,6 +34,11 @@ func MakeServiceName(c *v1alpha1.PulsarCluster) string {
 
 func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
 	return []v1.ServicePort{
+		{
+			Name:     "client",
+			Port:     v1alpha1.ZookeeperContainerClientDefaultPort,
+			NodePort: int32(32181),
+		},
 		{
 			Name: "server",
 			Port: v1alpha1.ZookeeperContainerServerDefaultPort,

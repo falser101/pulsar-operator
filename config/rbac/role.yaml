@@ -42,32 +42,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cache.example.com
-  resources:
-  - pulsarclusters
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cache.example.com
-  resources:
-  - pulsarclusters/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - cache.example.com
-  resources:
-  - pulsarclusters/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
   - ""
   resources:
   - configmaps
@@ -106,3 +80,29 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - pulsar.apache.org
+  resources:
+  - pulsarclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pulsar.apache.org
+  resources:
+  - pulsarclusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - pulsar.apache.org
+  resources:
+  - pulsarclusters/status
+  verbs:
+  - get
+  - patch
+  - update

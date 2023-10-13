@@ -12,7 +12,7 @@ metadata:
   name: pulsarcluster-editor-role
 rules:
 - apiGroups:
-  - cache.example.com
+  - pulsar.apache.org
   resources:
   - pulsarclusters
   verbs:
@@ -24,7 +24,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cache.example.com
+  - pulsar.apache.org
   resources:
   - pulsarclusters/status
   verbs:

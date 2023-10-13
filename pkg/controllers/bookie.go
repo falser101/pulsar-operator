@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -53,7 +54,9 @@ func (r *PulsarClusterReconciler) reconcileBookieConfigMap(c *v1alpha1.PulsarClu
 }
 
 func (r *PulsarClusterReconciler) reconcileBookieStatefulSet(c *v1alpha1.PulsarCluster) (err error) {
-
+	if !r.isJobCompleted(c) {
+		return
+	}
 	ssCreate := bookie.MakeStatefulSet(c)
 
 	ssCur := &appsv1.StatefulSet{}
@@ -91,6 +94,18 @@ func (r *PulsarClusterReconciler) reconcileBookieStatefulSet(c *v1alpha1.PulsarC
 		"CurrentNum", ssCur.Status.CurrentReplicas,
 	)
 	return
+}
+
+func (r *PulsarClusterReconciler) isJobCompleted(c *v1alpha1.PulsarCluster) bool {
+	job := &batchv1.Job{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      bookie.MakeInitBookieJobName(c),
+		Namespace: c.Namespace,
+	}, job)
+	if err == nil {
+		return job.Status.Succeeded == 1
+	}
+	return false
 }
 
 func (r *PulsarClusterReconciler) reconcileBookieService(c *v1alpha1.PulsarCluster) (err error) {
