@@ -1,0 +1,27 @@
+apiVersion: message.queue.my.domain/v1alpha1
+kind: Pulsar
+metadata:
+  labels:
+    app.kubernetes.io/name: pulsar
+    app.kubernetes.io/instance: pulsar-sample
+    app.kubernetes.io/part-of: pulsar-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: pulsar-operator
+  name: pulsar-sample
+spec:
+  broker:
+    size: 1
+  zookeeper:
+    size: 3
+  bookie:
+    size: 1
+    storageClassName: openebs-hostpath
+  autoRecovery:
+    size: 1
+  manager:
+    size: 1
+    image:
+      repository: 10.10.55.29:30003/tonglinkq-cn/tlq-cn-console
+      tag: 60-amd
+  monitor:
+    enable: false
