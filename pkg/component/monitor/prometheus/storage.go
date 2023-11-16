@@ -2,25 +2,25 @@ package prometheus
 
 import (
 	"fmt"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func makePrometheusDataVolumeName(c *cachev1alpha1.PulsarCluster) string {
+func makePrometheusDataVolumeName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-prometheus-data", c.Name)
 }
 
 // PV/PVC
-func makeVolumeClaimTemplates(c *cachev1alpha1.PulsarCluster) []v1.PersistentVolumeClaim {
+func makeVolumeClaimTemplates(c *v1alpha1.Pulsar) []v1.PersistentVolumeClaim {
 	return []v1.PersistentVolumeClaim{
 		makePrometheusDataVolumeClaimTemplate(c),
 	}
 }
 
-func makePrometheusDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaim {
+func makePrometheusDataVolumeClaimTemplate(c *v1alpha1.Pulsar) v1.PersistentVolumeClaim {
 	return v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      makePrometheusDataVolumeName(c),
@@ -30,7 +30,7 @@ func makePrometheusDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.Pe
 	}
 }
 
-func makePrometheusDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaimSpec {
+func makePrometheusDataVolumeClaimSpec(c *v1alpha1.Pulsar) v1.PersistentVolumeClaimSpec {
 	capacity := fmt.Sprintf("%dGi", c.Spec.Monitor.Prometheus.StorageCapacity)
 	return v1.PersistentVolumeClaimSpec{
 		AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce},
@@ -40,7 +40,7 @@ func makePrometheusDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.Persis
 }
 
 // EmptyDir volume
-func makeEmptyDirVolume(c *cachev1alpha1.PulsarCluster) []v1.Volume {
+func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 	return []v1.Volume{
 		{
 			Name:         makePrometheusDataVolumeName(c),

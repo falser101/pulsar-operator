@@ -2,16 +2,16 @@ package manager
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"pulsar-operator/pkg/api/v1alpha1"
 )
 
-func MakeServiceName(c *v1alpha1.PulsarCluster) string {
+func MakeServiceName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-service", c.GetName())
 }
 
-func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
+func MakeService(c *v1alpha1.Pulsar) *v1.Service {
 
 	return &v1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -31,7 +31,7 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 	}
 }
 
-func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
+func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
 	var servicePorts = make([]v1.ServicePort, 0, 2)
 	if c.Spec.Manager.FrontendNodePort == 0 {
 		servicePorts = append(servicePorts, v1.ServicePort{

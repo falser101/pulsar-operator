@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"context"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/zookeeper"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/policy/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/zookeeper"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *PulsarClusterReconciler) reconcileZookeeper(c *cachev1alpha1.PulsarCluster) error {
+func (r *PulsarClusterReconciler) reconcileZookeeper(c *v1alpha1.Pulsar) error {
 	for _, fun := range []reconcileFunc{
 		r.reconcileZookeeperConfigMap,
 		r.reconcileZookeeperStatefulSet,
@@ -20,14 +20,14 @@ func (r *PulsarClusterReconciler) reconcileZookeeper(c *cachev1alpha1.PulsarClus
 		//r.reconcileZookeeperPodDisruptionBudget,
 	} {
 		if err := fun(c); err != nil {
-			r.log.Error(err, "Reconciling PulsarCluster Zookeeper Error", c)
+			r.log.Error(err, "Reconciling Pulsar Zookeeper Error", c)
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileZookeeperConfigMap(c *cachev1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileZookeeperConfigMap(c *v1alpha1.Pulsar) (err error) {
 	cmCreate := zookeeper.MakeConfigMap(c)
 
 	cmCur := &v1.ConfigMap{}
@@ -49,7 +49,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperConfigMap(c *cachev1alpha1.P
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileZookeeperStatefulSet(c *cachev1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileZookeeperStatefulSet(c *v1alpha1.Pulsar) (err error) {
 	ssCreate := zookeeper.MakeStatefulSet(c)
 
 	ssCur := &appsv1.StatefulSet{}
@@ -58,7 +58,6 @@ func (r *PulsarClusterReconciler) reconcileZookeeperStatefulSet(c *cachev1alpha1
 		Namespace: ssCreate.Namespace,
 	}, ssCur)
 	if err != nil && errors.IsNotFound(err) {
-
 		if err = controllerutil.SetControllerReference(c, ssCreate, r.scheme); err != nil {
 			return err
 		}
@@ -90,7 +89,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperStatefulSet(c *cachev1alpha1
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileZookeeperService(c *cachev1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileZookeeperService(c *v1alpha1.Pulsar) (err error) {
 	sCreate := zookeeper.MakeService(c)
 
 	sCur := &v1.Service{}
@@ -112,7 +111,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperService(c *cachev1alpha1.Pul
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileZookeeperPodDisruptionBudget(c *cachev1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileZookeeperPodDisruptionBudget(c *v1alpha1.Pulsar) (err error) {
 	pdb := zookeeper.MakePodDisruptionBudget(c)
 
 	pdbCur := &v1beta1.PodDisruptionBudget{}
@@ -134,7 +133,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperPodDisruptionBudget(c *cache
 	return
 }
 
-func (r *PulsarClusterReconciler) isZookeeperRunning(c *cachev1alpha1.PulsarCluster) bool {
+func (r *PulsarClusterReconciler) isZookeeperRunning(c *v1alpha1.Pulsar) bool {
 	ss := &appsv1.StatefulSet{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{
 		Name:      zookeeper.MakeStatefulSetName(c),

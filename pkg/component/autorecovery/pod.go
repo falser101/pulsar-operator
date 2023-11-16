@@ -1,18 +1,18 @@
 package autorecovery
 
 import (
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	"k8s.io/api/core/v1"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/bookie"
 )
 
-func makePodSpec(c *cachev1alpha1.PulsarCluster) v1.PodSpec {
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	return v1.PodSpec{
 		Containers: []v1.Container{makeContainer(c)},
 	}
 }
 
-func makeContainer(c *cachev1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "replication-worker",
 		Image:           c.Spec.AutoRecovery.Image.GenerateImage(),
@@ -38,7 +38,7 @@ func makeContainerCommandArgs() []string {
 	}
 }
 
-func makeContainerEnv(c *cachev1alpha1.PulsarCluster) []v1.EnvVar {
+func makeContainerEnv(c *v1alpha1.Pulsar) []v1.EnvVar {
 	env := make([]v1.EnvVar, 0)
 	env = append(env,
 		v1.EnvVar{
@@ -53,7 +53,7 @@ func makeContainerEnv(c *cachev1alpha1.PulsarCluster) []v1.EnvVar {
 	return env
 }
 
-func makeContainerEnvFrom(c *cachev1alpha1.PulsarCluster) []v1.EnvFromSource {
+func makeContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 	froms := make([]v1.EnvFromSource, 0)
 
 	var configRef v1.ConfigMapEnvSource

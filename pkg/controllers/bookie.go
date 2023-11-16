@@ -2,36 +2,34 @@ package controllers
 
 import (
 	"context"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	appsv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/bookie"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.PulsarCluster) error {
+func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.Pulsar) error {
 	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
 		return nil
 	}
 
 	for _, fun := range []reconcileFunc{
 		r.reconcileBookieConfigMap,
-		r.reconcileBookieJob,
 		r.reconcileBookieStatefulSet,
 		r.reconcileBookieService,
 	} {
 		if err := fun(c); err != nil {
-			r.log.Error(err, "Reconciling PulsarCluster Broker Error", c)
+			r.log.Error(err, "Reconciling Pulsar Broker Error", c)
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileBookieConfigMap(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileBookieConfigMap(c *v1alpha1.Pulsar) (err error) {
 	cmCreate := bookie.MakeConfigMap(c)
 
 	cmCur := &v1.ConfigMap{}
@@ -53,10 +51,8 @@ func (r *PulsarClusterReconciler) reconcileBookieConfigMap(c *v1alpha1.PulsarClu
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileBookieStatefulSet(c *v1alpha1.PulsarCluster) (err error) {
-	if !r.isJobCompleted(c) {
-		return
-	}
+func (r *PulsarClusterReconciler) reconcileBookieStatefulSet(c *v1alpha1.Pulsar) (err error) {
+
 	ssCreate := bookie.MakeStatefulSet(c)
 
 	ssCur := &appsv1.StatefulSet{}
@@ -96,19 +92,7 @@ func (r *PulsarClusterReconciler) reconcileBookieStatefulSet(c *v1alpha1.PulsarC
 	return
 }
 
-func (r *PulsarClusterReconciler) isJobCompleted(c *v1alpha1.PulsarCluster) bool {
-	job := &batchv1.Job{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{
-		Name:      bookie.MakeInitBookieJobName(c),
-		Namespace: c.Namespace,
-	}, job)
-	if err == nil {
-		return job.Status.Succeeded == 1
-	}
-	return false
-}
-
-func (r *PulsarClusterReconciler) reconcileBookieService(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileBookieService(c *v1alpha1.Pulsar) (err error) {
 	sCreate := bookie.MakeService(c)
 
 	sCur := &v1.Service{}
@@ -130,7 +114,7 @@ func (r *PulsarClusterReconciler) reconcileBookieService(c *v1alpha1.PulsarClust
 	return
 }
 
-func (r *PulsarClusterReconciler) isBookieRunning(c *v1alpha1.PulsarCluster) bool {
+func (r *PulsarClusterReconciler) isBookieRunning(c *v1alpha1.Pulsar) bool {
 	ss := &appsv1.StatefulSet{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{
 		Name:      bookie.MakeStatefulSetName(c),

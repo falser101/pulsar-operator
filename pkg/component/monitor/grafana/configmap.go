@@ -2,13 +2,13 @@ package grafana
 
 import (
 	"fmt"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func MakeConfigMap(c *cachev1alpha1.PulsarCluster) *v1.ConfigMap {
+func MakeConfigMap(c *v1alpha1.Pulsar) *v1.ConfigMap {
 	return &v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -24,7 +24,7 @@ func MakeConfigMap(c *cachev1alpha1.PulsarCluster) *v1.ConfigMap {
 	}
 }
 
-func MakeConfigMapName(c *cachev1alpha1.PulsarCluster) string {
+func MakeConfigMapName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-monitor-grafana-configmap", c.GetName())
 }
 

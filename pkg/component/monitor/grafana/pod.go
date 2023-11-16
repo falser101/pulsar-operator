@@ -2,19 +2,19 @@ package grafana
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/monitor/prometheus"
 	"k8s.io/api/core/v1"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/monitor/prometheus"
 )
 
-func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	return v1.PodSpec{
 		Containers: []v1.Container{makeContainer(c)},
 		Volumes:    makeVolumes(c),
 	}
 }
 
-func makeVolumes(c *v1alpha1.PulsarCluster) []v1.Volume {
+func makeVolumes(c *v1alpha1.Pulsar) []v1.Volume {
 	var defaultMode int32 = 420
 	var dataVolume v1.Volume
 	if isUseEmptyDirVolume(c) {
@@ -38,7 +38,7 @@ func makeVolumes(c *v1alpha1.PulsarCluster) []v1.Volume {
 	}
 }
 
-func makePVCDataVolume(c *v1alpha1.PulsarCluster) v1.Volume {
+func makePVCDataVolume(c *v1alpha1.Pulsar) v1.Volume {
 	return v1.Volume{
 		Name: makeDataVolumeName(c),
 		VolumeSource: v1.VolumeSource{
@@ -49,7 +49,7 @@ func makePVCDataVolume(c *v1alpha1.PulsarCluster) v1.Volume {
 	}
 }
 
-func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "grafana",
 		Image:           c.Spec.Monitor.Grafana.Image.GenerateImage(),
@@ -60,7 +60,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	}
 }
 
-func makeVolumeMounts(c *v1alpha1.PulsarCluster) []v1.VolumeMount {
+func makeVolumeMounts(c *v1alpha1.Pulsar) []v1.VolumeMount {
 	return []v1.VolumeMount{
 		{
 			Name:      "cfg",
@@ -74,11 +74,11 @@ func makeVolumeMounts(c *v1alpha1.PulsarCluster) []v1.VolumeMount {
 	}
 }
 
-func makeDataVolumeName(c *v1alpha1.PulsarCluster) string {
+func makeDataVolumeName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-monitor-grafana-data", c.Name)
 }
 
-func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
+func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
 			Name:          "grafana",
@@ -88,7 +88,7 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 	}
 }
 
-func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
+func makeContainerEnv(c *v1alpha1.Pulsar) []v1.EnvVar {
 	prometheusUrl := fmt.Sprintf("http://%s:%d/", prometheus.MakeServiceName(c), v1alpha1.PulsarPrometheusServerPort)
 	env := []v1.EnvVar{
 		{
@@ -150,13 +150,13 @@ func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
 }
 
 // EmptyDir volume
-func makeEmptyDirDataVolume(c *v1alpha1.PulsarCluster) v1.Volume {
+func makeEmptyDirDataVolume(c *v1alpha1.Pulsar) v1.Volume {
 	return v1.Volume{
 		Name:         makeDataVolumeName(c),
 		VolumeSource: v1.VolumeSource{EmptyDir: &v1.EmptyDirVolumeSource{}},
 	}
 }
 
-func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
+func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
 	return c.Spec.Monitor.Grafana.StorageClassName == ""
 }

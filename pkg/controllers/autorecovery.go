@@ -2,16 +2,16 @@ package controllers
 
 import (
 	"context"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/autorecovery"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/autorecovery"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *PulsarClusterReconciler) reconcileAutoRecovery(c *v1alpha1.PulsarCluster) error {
+func (r *PulsarClusterReconciler) reconcileAutoRecovery(c *v1alpha1.Pulsar) error {
 	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
 		return nil
 	}
@@ -20,14 +20,14 @@ func (r *PulsarClusterReconciler) reconcileAutoRecovery(c *v1alpha1.PulsarCluste
 		r.reconcileBookieAutoRecoveryDeployment,
 	} {
 		if err := fun(c); err != nil {
-			r.log.Error(err, "Reconciling PulsarCluster AutoRecovery Error", c)
+			r.log.Error(err, "Reconciling Pulsar AutoRecovery Error", c)
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileBookieAutoRecoveryDeployment(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileBookieAutoRecoveryDeployment(c *v1alpha1.Pulsar) (err error) {
 	dmCreate := autorecovery.MakeDeployment(c)
 
 	dmCur := &appsv1.Deployment{}

@@ -81,9 +81,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - pulsar.apache.org
+  - message.queue.my.domain
   resources:
-  - pulsarclusters
+  - pulsars
   verbs:
   - create
   - delete
@@ -93,15 +93,15 @@ rules:
   - update
   - watch
 - apiGroups:
-  - pulsar.apache.org
+  - message.queue.my.domain
   resources:
-  - pulsarclusters/finalizers
+  - pulsars/finalizers
   verbs:
   - update
 - apiGroups:
-  - pulsar.apache.org
+  - message.queue.my.domain
   resources:
-  - pulsarclusters/status
+  - pulsars/status
   verbs:
   - get
   - patch

@@ -1,18 +1,18 @@
 package broker
 
 import (
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"k8s.io/api/core/v1"
-	"pulsar-operator/pkg/api/v1alpha1"
 )
 
-func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	return v1.PodSpec{
 		Affinity:   c.Spec.Broker.Pod.Affinity,
 		Containers: []v1.Container{makeContainer(c)},
 	}
 }
 
-func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "broker",
 		Image:           c.Spec.Broker.Image.GenerateImage(),
@@ -41,7 +41,7 @@ func makeContainerCommandArgs() []string {
 	}
 }
 
-func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
+func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
 			Name:          "http",
@@ -56,7 +56,7 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 	}
 }
 
-func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
+func makeContainerEnv(c *v1alpha1.Pulsar) []v1.EnvVar {
 	env := make([]v1.EnvVar, 0)
 	env = append(env, v1.EnvVar{
 		Name:      AdvertisedAddress,
@@ -65,7 +65,7 @@ func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
 	return env
 }
 
-func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
+func makeContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 	froms := make([]v1.EnvFromSource, 0)
 
 	var configRef v1.ConfigMapEnvSource

@@ -2,33 +2,33 @@ package manager
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
 )
 
-func makeManagerTokensName(c *cachev1alpha1.PulsarCluster) string {
+func makeManagerTokensName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-tokens", c.Name)
 }
 
-func makeManagerTokenKeysName(c *cachev1alpha1.PulsarCluster) string {
+func makeManagerTokenKeysName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-token-keys", c.Name)
 }
 
-func makeManagerBackendScriptName(c *cachev1alpha1.PulsarCluster) string {
+func makeManagerBackendScriptName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-backend-script", c.Name)
 }
 
-func makeManagerScriptName(c *cachev1alpha1.PulsarCluster) string {
+func makeManagerScriptName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-script", c.Name)
 }
 
-func makeManagerDataName(c *cachev1alpha1.PulsarCluster) string {
+func makeManagerDataName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-data", c.Name)
 }
 
-func makeEmptyDirVolume(c *cachev1alpha1.PulsarCluster) []v1.Volume {
+func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 	var scriptMode int32 = 493
 	var tokenMode int32 = 420
 	return []v1.Volume{
@@ -86,22 +86,22 @@ func makeEmptyDirVolume(c *cachev1alpha1.PulsarCluster) []v1.Volume {
 	}
 }
 
-func makeManagerAdminSecretName(c *cachev1alpha1.PulsarCluster) string {
+func makeManagerAdminSecretName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-token-console-admin", c.Name)
 }
 
-func makeAsymmetricKeyName(c *cachev1alpha1.PulsarCluster) string {
+func makeAsymmetricKeyName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-token-asymmetric-key", c.Name)
 }
 
 // PV/PVC
-func makeVolumeClaimTemplates(c *cachev1alpha1.PulsarCluster) []v1.PersistentVolumeClaim {
+func makeVolumeClaimTemplates(c *v1alpha1.Pulsar) []v1.PersistentVolumeClaim {
 	return []v1.PersistentVolumeClaim{
 		makeManagerDataVolumeClaimTemplate(c),
 	}
 }
 
-func makeManagerDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaim {
+func makeManagerDataVolumeClaimTemplate(c *v1alpha1.Pulsar) v1.PersistentVolumeClaim {
 	return v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      makeManagerDataName(c),
@@ -111,7 +111,7 @@ func makeManagerDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.Persi
 	}
 }
 
-func makeManagerDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaimSpec {
+func makeManagerDataVolumeClaimSpec(c *v1alpha1.Pulsar) v1.PersistentVolumeClaimSpec {
 	capacity := fmt.Sprintf("%dGi", c.Spec.Manager.StorageCapacity)
 	return v1.PersistentVolumeClaimSpec{
 		AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce},

@@ -2,14 +2,14 @@ package broker
 
 import (
 	"fmt"
-	"pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func MakeDeployment(c *v1alpha1.PulsarCluster) *appsv1.Deployment {
+func MakeDeployment(c *v1alpha1.Pulsar) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -24,11 +24,11 @@ func MakeDeployment(c *v1alpha1.PulsarCluster) *appsv1.Deployment {
 	}
 }
 
-func MakeDeploymentName(c *v1alpha1.PulsarCluster) string {
+func MakeDeploymentName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-broker-deployment", c.GetName())
 }
 
-func makeDeploymentSpec(c *v1alpha1.PulsarCluster) appsv1.DeploymentSpec {
+func makeDeploymentSpec(c *v1alpha1.Pulsar) appsv1.DeploymentSpec {
 	return appsv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.BrokerComponent),
@@ -38,7 +38,7 @@ func makeDeploymentSpec(c *v1alpha1.PulsarCluster) appsv1.DeploymentSpec {
 	}
 }
 
-func makeDeploymentPodTemplate(c *v1alpha1.PulsarCluster) v1.PodTemplateSpec {
+func makeDeploymentPodTemplate(c *v1alpha1.Pulsar) v1.PodTemplateSpec {
 	return v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: c.GetName(),
