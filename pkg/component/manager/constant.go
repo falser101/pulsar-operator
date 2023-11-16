@@ -5,7 +5,7 @@ const (
 	EntrypointKey        = "entrypoint.sh"
 
 	BackendEntrypointValue = `/pulsar-manager/tongpulsar_console/bin/tongpulsar_console \
-      --sync.cluster.interval=300000 \
+      --sync.cluster.interval=60000 \
       --spring.datasource.initialization-mode=never \
       --spring.datasource.driver-class-name=org.postgresql.Driver \
       --spring.datasource.url=jdbc:postgresql://127.0.0.1:5432/pulsar_manager \
