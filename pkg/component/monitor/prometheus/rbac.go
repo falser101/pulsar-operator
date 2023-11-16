@@ -2,14 +2,14 @@ package prometheus
 
 import (
 	"fmt"
-	"pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func MakeClusterRole(c *v1alpha1.PulsarCluster) *rbacv1.ClusterRole {
+func MakeClusterRole(c *v1alpha1.Pulsar) *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",
@@ -23,11 +23,11 @@ func MakeClusterRole(c *v1alpha1.PulsarCluster) *rbacv1.ClusterRole {
 	}
 }
 
-func MakeClusterRoleName(c *v1alpha1.PulsarCluster) string {
+func MakeClusterRoleName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-prometheus-cluster-role", c.GetName())
 }
 
-func makeClusterRoleRules(c *v1alpha1.PulsarCluster) []rbacv1.PolicyRule {
+func makeClusterRoleRules(c *v1alpha1.Pulsar) []rbacv1.PolicyRule {
 	result := make([]rbacv1.PolicyRule, 0)
 
 	rule1 := rbacv1.PolicyRule{
@@ -59,7 +59,7 @@ func makeClusterRoleRules(c *v1alpha1.PulsarCluster) []rbacv1.PolicyRule {
 	return result
 }
 
-func MakeServiceAccount(c *v1alpha1.PulsarCluster) *corev1.ServiceAccount {
+func MakeServiceAccount(c *v1alpha1.Pulsar) *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceAccount",
@@ -73,11 +73,11 @@ func MakeServiceAccount(c *v1alpha1.PulsarCluster) *corev1.ServiceAccount {
 	}
 }
 
-func MakeServiceAccountName(c *v1alpha1.PulsarCluster) string {
+func MakeServiceAccountName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-prometheus-serviceaccount", c.GetName())
 }
 
-func MakeClusterRoleBinding(c *v1alpha1.PulsarCluster) *rbacv1.ClusterRoleBinding {
+func MakeClusterRoleBinding(c *v1alpha1.Pulsar) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRoleBinding",
@@ -96,11 +96,11 @@ func MakeClusterRoleBinding(c *v1alpha1.PulsarCluster) *rbacv1.ClusterRoleBindin
 	}
 }
 
-func MakeClusterRoleBindingName(c *v1alpha1.PulsarCluster) string {
+func MakeClusterRoleBindingName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-prometheus-clusterrole-binding", c.GetName())
 }
 
-func makeSubjects(c *v1alpha1.PulsarCluster) []rbacv1.Subject {
+func makeSubjects(c *v1alpha1.Pulsar) []rbacv1.Subject {
 	result := make([]rbacv1.Subject, 0)
 
 	s := rbacv1.Subject{

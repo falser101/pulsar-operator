@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"context"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/monitor/grafana"
-	"pulsar-operator/pkg/component/monitor/prometheus"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/monitor/grafana"
+	"github.com/falser101/pulsar-operator/pkg/component/monitor/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -16,7 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *PulsarClusterReconciler) reconcileMonitor(c *v1alpha1.PulsarCluster) error {
+func (r *PulsarClusterReconciler) reconcileMonitor(c *v1alpha1.Pulsar) error {
 	if c.Status.Phase != v1alpha1.PulsarClusterRunningPhase {
 		return nil
 	}
@@ -45,7 +45,7 @@ func (r *PulsarClusterReconciler) reconcileMonitor(c *v1alpha1.PulsarCluster) er
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorPrometheus(c *v1alpha1.PulsarCluster) error {
+func (r *PulsarClusterReconciler) reconcileMonitorPrometheus(c *v1alpha1.Pulsar) error {
 	for _, fun := range []reconcileFunc{
 		r.reconcileMonitorPrometheusRBAC,
 		r.reconcileMonitorPrometheusConfigMap,
@@ -59,7 +59,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorPrometheus(c *v1alpha1.PulsarC
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorPrometheusRBAC(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorPrometheusRBAC(c *v1alpha1.Pulsar) (err error) {
 	// cluster role
 	crCreate := prometheus.MakeClusterRole(c)
 	crCur := &rbacv1.ClusterRole{}
@@ -106,7 +106,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorPrometheusRBAC(c *v1alpha1.Pul
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorPrometheusConfigMap(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorPrometheusConfigMap(c *v1alpha1.Pulsar) (err error) {
 	cmCreate := prometheus.MakeConfigMap(c)
 
 	cmCur := &v1.ConfigMap{}
@@ -128,7 +128,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorPrometheusConfigMap(c *v1alpha
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorPrometheusStatefulSet(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorPrometheusStatefulSet(c *v1alpha1.Pulsar) (err error) {
 	sSetCreate := prometheus.MakeStatefulSet(c)
 
 	sSetCur := &appsv1.StatefulSet{}
@@ -150,7 +150,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorPrometheusStatefulSet(c *v1alp
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorPrometheusService(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorPrometheusService(c *v1alpha1.Pulsar) (err error) {
 	sCreate := prometheus.MakeService(c)
 
 	sCur := &v1.Service{}
@@ -172,7 +172,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorPrometheusService(c *v1alpha1.
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorGrafana(c *v1alpha1.PulsarCluster) error {
+func (r *PulsarClusterReconciler) reconcileMonitorGrafana(c *v1alpha1.Pulsar) error {
 	for _, fun := range []reconcileFunc{
 		r.reconcileMonitorGrafanaConfigMap,
 		r.reconcileManagerGrafanaSecret,
@@ -187,7 +187,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorGrafana(c *v1alpha1.PulsarClus
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorGrafanaConfigMap(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorGrafanaConfigMap(c *v1alpha1.Pulsar) (err error) {
 	cmCreate := grafana.MakeConfigMap(c)
 	cmCur := &v1.ConfigMap{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -208,7 +208,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorGrafanaConfigMap(c *v1alpha1.P
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileManagerGrafanaSecret(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManagerGrafanaSecret(c *v1alpha1.Pulsar) (err error) {
 	secCreate := grafana.MakeSecret(c)
 	secCur := &v1.Secret{}
 	if err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -228,7 +228,7 @@ func (r *PulsarClusterReconciler) reconcileManagerGrafanaSecret(c *v1alpha1.Puls
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileManagerGrafanaPVC(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManagerGrafanaPVC(c *v1alpha1.Pulsar) (err error) {
 	if c.Spec.Monitor.Grafana.StorageClassName == "" {
 		return
 	}
@@ -251,7 +251,7 @@ func (r *PulsarClusterReconciler) reconcileManagerGrafanaPVC(c *v1alpha1.PulsarC
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorGrafanaDeployment(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorGrafanaDeployment(c *v1alpha1.Pulsar) (err error) {
 	dmCreate := grafana.MakeDeployment(c)
 
 	dmCur := &appsv1.Deployment{}
@@ -273,7 +273,7 @@ func (r *PulsarClusterReconciler) reconcileMonitorGrafanaDeployment(c *v1alpha1.
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileMonitorGrafanaService(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileMonitorGrafanaService(c *v1alpha1.Pulsar) (err error) {
 	sCreate := grafana.MakeService(c)
 
 	sCur := &v1.Service{}

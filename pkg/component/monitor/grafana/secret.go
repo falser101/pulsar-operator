@@ -2,12 +2,12 @@ package grafana
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
 )
 
-func MakeSecret(c *cachev1alpha1.PulsarCluster) *v1.Secret {
+func MakeSecret(c *v1alpha1.Pulsar) *v1.Secret {
 	return &v1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -25,6 +25,6 @@ func MakeSecret(c *cachev1alpha1.PulsarCluster) *v1.Secret {
 	}
 }
 
-func makeGrafanaSecretName(c *cachev1alpha1.PulsarCluster) string {
+func makeGrafanaSecretName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-monitor-grafana-secret", c.Name)
 }

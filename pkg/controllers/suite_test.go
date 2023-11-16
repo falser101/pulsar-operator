@@ -17,8 +17,8 @@ limitations under the License.
 package controllers
 
 import (
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"path/filepath"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -61,7 +61,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
 
-	err = cachev1alpha1.AddToScheme(scheme.Scheme)
+	err = v1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	//+kubebuilder:scaffold:scheme

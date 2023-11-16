@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"context"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/broker"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *PulsarClusterReconciler) reconcileBroker(c *v1alpha1.PulsarCluster) error {
-	if !r.isBookieRunning(c) {
+func (r *PulsarClusterReconciler) reconcileBroker(c *v1alpha1.Pulsar) error {
+	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
 		return nil
 	}
 
@@ -22,14 +22,14 @@ func (r *PulsarClusterReconciler) reconcileBroker(c *v1alpha1.PulsarCluster) err
 		r.reconcileBrokerService,
 	} {
 		if err := fun(c); err != nil {
-			r.log.Error(err, "Reconciling PulsarCluster Broker Error", c)
+			r.log.Error(err, "Reconciling Pulsar Broker Error", c)
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *PulsarClusterReconciler) reconcileBrokerConfigMap(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileBrokerConfigMap(c *v1alpha1.Pulsar) (err error) {
 	cmCreate := broker.MakeConfigMap(c)
 
 	cmCur := &v1.ConfigMap{}
@@ -51,7 +51,7 @@ func (r *PulsarClusterReconciler) reconcileBrokerConfigMap(c *v1alpha1.PulsarClu
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.Pulsar) (err error) {
 	dmCreate := broker.MakeDeployment(c)
 
 	dmCur := &appsv1.Deployment{}
@@ -85,7 +85,7 @@ func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.PulsarCl
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileBrokerService(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileBrokerService(c *v1alpha1.Pulsar) (err error) {
 	sCreate := broker.MakeService(c)
 
 	sCur := &v1.Service{}
@@ -107,7 +107,7 @@ func (r *PulsarClusterReconciler) reconcileBrokerService(c *v1alpha1.PulsarClust
 	return
 }
 
-func (r *PulsarClusterReconciler) isBrokerRunning(c *v1alpha1.PulsarCluster) bool {
+func (r *PulsarClusterReconciler) isBrokerRunning(c *v1alpha1.Pulsar) bool {
 	dm := broker.MakeDeployment(c)
 
 	dmCur := &appsv1.Deployment{}

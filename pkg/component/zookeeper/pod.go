@@ -2,7 +2,7 @@ package zookeeper
 
 import (
 	"fmt"
-	"pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"strings"
 
 	"k8s.io/api/core/v1"
@@ -11,8 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func MakePodDisruptionBudget(c *v1alpha1.PulsarCluster) *v1beta1.PodDisruptionBudget {
-	count := intstr.FromInt32(1)
+func MakePodDisruptionBudget(c *v1alpha1.Pulsar) *v1beta1.PodDisruptionBudget {
+	count := intstr.FromInt(1)
 	return &v1beta1.PodDisruptionBudget{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "PodDisruptionBudget",
@@ -31,23 +31,26 @@ func MakePodDisruptionBudget(c *v1alpha1.PulsarCluster) *v1beta1.PodDisruptionBu
 	}
 }
 
-func MakePodDisruptionBudgetName(c *v1alpha1.PulsarCluster) string {
+func MakePodDisruptionBudgetName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-zookeeper-poddisruptionbudget", c.GetName())
 }
 
-func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
-	s := v1.PodSpec{
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
+	return v1.PodSpec{
 		Affinity:   c.Spec.Zookeeper.Pod.Affinity,
 		Containers: []v1.Container{makeContainer(c)},
+		Volumes: []v1.Volume{
+			{
+				Name: ContainerDataVolumeName,
+				VolumeSource: v1.VolumeSource{
+					EmptyDir: &v1.EmptyDirVolumeSource{},
+				},
+			},
+		},
 	}
-
-	if isUseEmptyDirVolume(c) {
-		s.Volumes = makeEmptyDirVolume(c)
-	}
-	return s
 }
 
-func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "zookeeper",
 		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
@@ -72,7 +75,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 		},
 
 		VolumeMounts: []v1.VolumeMount{
-			{Name: makeDataName(c), MountPath: ContainerDataPath},
+			{Name: ContainerDataVolumeName, MountPath: ContainerDataPath},
 		},
 	}
 }
@@ -93,7 +96,7 @@ func makeContainerCommandArgs() []string {
 	}
 }
 
-func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
+func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
 			Name:          "client",
@@ -113,13 +116,13 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 	}
 }
 
-func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
+func makeContainerEnv(c *v1alpha1.Pulsar) []v1.EnvVar {
 	env := make([]v1.EnvVar, 0)
 	env = append(env, v1.EnvVar{Name: ContainerZookeeperServerList, Value: strings.Join(makeStatefulSetPodNameList(c), ",")})
 	return env
 }
 
-func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
+func makeContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 	froms := make([]v1.EnvFromSource, 0)
 
 	var configRef v1.ConfigMapEnvSource
@@ -127,8 +130,4 @@ func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 
 	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
 	return froms
-}
-
-func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
-	return c.Spec.Zookeeper.StorageClassName == ""
 }

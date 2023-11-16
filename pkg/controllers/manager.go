@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"context"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/manager"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/manager"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *PulsarClusterReconciler) reconcileManager(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManager(c *v1alpha1.Pulsar) (err error) {
 	if c.Status.Phase != v1alpha1.PulsarClusterRunningPhase {
 		return
 	}
@@ -23,14 +23,14 @@ func (r *PulsarClusterReconciler) reconcileManager(c *v1alpha1.PulsarCluster) (e
 		r.reconcileManagerJob,
 	} {
 		if err = fun(c); err != nil {
-			r.log.Error(err, "Reconciling PulsarCluster Manager Error", c)
+			r.log.Error(err, "Reconciling Pulsar Manager Error", c)
 			return
 		}
 	}
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileManagerConfigMap(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManagerConfigMap(c *v1alpha1.Pulsar) (err error) {
 	cmCreate := manager.MakeConfigMap(c)
 	configMap := &v1.ConfigMap{}
 	if err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -50,7 +50,7 @@ func (r *PulsarClusterReconciler) reconcileManagerConfigMap(c *v1alpha1.PulsarCl
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileManagerStatefulSet(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManagerStatefulSet(c *v1alpha1.Pulsar) (err error) {
 	sCreate := manager.MakeStatefulSet(c)
 	sCur := &appsv1.StatefulSet{}
 	if err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -75,7 +75,7 @@ func (r *PulsarClusterReconciler) reconcileManagerStatefulSet(c *v1alpha1.Pulsar
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileManagerJob(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManagerJob(c *v1alpha1.Pulsar) (err error) {
 	jobCreate := manager.MakeJob(c)
 	jobCur := &batchv1.Job{}
 	if err = r.client.Get(context.TODO(), types.NamespacedName{
@@ -95,7 +95,7 @@ func (r *PulsarClusterReconciler) reconcileManagerJob(c *v1alpha1.PulsarCluster)
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileManagerService(c *v1alpha1.PulsarCluster) (err error) {
+func (r *PulsarClusterReconciler) reconcileManagerService(c *v1alpha1.Pulsar) (err error) {
 	svcCreate := manager.MakeService(c)
 	svcCur := &v1.Service{}
 	if err = r.client.Get(context.TODO(), types.NamespacedName{

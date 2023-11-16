@@ -2,12 +2,12 @@ package prometheus
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"pulsar-operator/pkg/api/v1alpha1"
 )
 
-func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	pod := v1.PodSpec{
 		Containers: []v1.Container{
 			makeConfigMapReloadContainer(c),
@@ -22,7 +22,7 @@ func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	return pod
 }
 
-func makeConfigMapReloadContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeConfigMapReloadContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:                     makeConfigMapReloadContainerName(c),
 		Image:                    "jimmidyson/configmap-reload:v0.3.0",
@@ -40,18 +40,18 @@ func makeConfigMapReloadContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	}
 }
 
-func makeConfigMapReloadContainerArgs(c *v1alpha1.PulsarCluster) []string {
+func makeConfigMapReloadContainerArgs(c *v1alpha1.Pulsar) []string {
 	return []string{
 		"--volume-dir=/etc/config",
 		"--webhook-url=http://127.0.0.1:9090/-/reload",
 	}
 }
 
-func makeConfigMapReloadContainerName(c *v1alpha1.PulsarCluster) string {
+func makeConfigMapReloadContainerName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-prometheus-configmap-reload", c.Name)
 }
 
-func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "prometheus",
 		Image:           c.Spec.Monitor.Prometheus.Image.GenerateImage(),
@@ -105,7 +105,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	}
 }
 
-func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
+func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
 			Name:          "prometheus",
@@ -115,7 +115,7 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 	}
 }
 
-func makeContainerVolumeMount(c *v1alpha1.PulsarCluster) []v1.VolumeMount {
+func makeContainerVolumeMount(c *v1alpha1.Pulsar) []v1.VolumeMount {
 	return []v1.VolumeMount{
 		{
 			Name:      ConfigVolumeName,
@@ -133,7 +133,7 @@ func makeContainerVolumeMount(c *v1alpha1.PulsarCluster) []v1.VolumeMount {
 	}
 }
 
-func makeVolumes(c *v1alpha1.PulsarCluster) []v1.Volume {
+func makeVolumes(c *v1alpha1.Pulsar) []v1.Volume {
 	return []v1.Volume{
 		{
 			Name:         DataVolumeName,
@@ -147,17 +147,11 @@ func makeVolumes(c *v1alpha1.PulsarCluster) []v1.Volume {
 			Name: ClientTokenName,
 			VolumeSource: v1.VolumeSource{Secret: &v1.SecretVolumeSource{
 				SecretName: fmt.Sprintf("%s-token-admin", c.Name),
-				Items: []v1.KeyToPath{
-					{
-						Key:  "TOKEN",
-						Path: "client/token",
-					},
-				},
 			}},
 		},
 	}
 }
 
-func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
+func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
 	return c.Spec.Monitor.Prometheus.StorageClassName == ""
 }

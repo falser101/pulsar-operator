@@ -2,13 +2,17 @@ package manager
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"pulsar-operator/pkg/api/v1alpha1"
 )
 
-func MakeJob(c *v1alpha1.PulsarCluster) *batchv1.Job {
+const (
+	ComponentName = "init-manager-job"
+)
+
+func MakeJob(c *v1alpha1.Pulsar) *batchv1.Job {
 	return &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Job",
@@ -23,11 +27,11 @@ func MakeJob(c *v1alpha1.PulsarCluster) *batchv1.Job {
 	}
 }
 
-func MakeInitManagerJobName(c *v1alpha1.PulsarCluster) string {
+func MakeInitManagerJobName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-init-manager-job", c.GetName())
 }
 
-func makeJobSpec(c *v1alpha1.PulsarCluster) batchv1.JobSpec {
+func makeJobSpec(c *v1alpha1.Pulsar) batchv1.JobSpec {
 	parallelism := int32(1)
 	completions := int32(1)
 	return batchv1.JobSpec{
@@ -37,7 +41,7 @@ func makeJobSpec(c *v1alpha1.PulsarCluster) batchv1.JobSpec {
 	}
 }
 
-func makePodTemplate(c *v1alpha1.PulsarCluster) corev1.PodTemplateSpec {
+func makePodTemplate(c *v1alpha1.Pulsar) corev1.PodTemplateSpec {
 	return corev1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: c.GetName(),
@@ -51,7 +55,7 @@ func makePodTemplate(c *v1alpha1.PulsarCluster) corev1.PodTemplateSpec {
 	}
 }
 
-func makeJobInitContainer(c *v1alpha1.PulsarCluster) corev1.Container {
+func makeJobInitContainer(c *v1alpha1.Pulsar) corev1.Container {
 	return corev1.Container{
 		Name:            makeJobInitContainerName(c),
 		Image:           c.Spec.Broker.Image.GenerateImage(),
@@ -61,12 +65,12 @@ func makeJobInitContainer(c *v1alpha1.PulsarCluster) corev1.Container {
 	}
 }
 
-func makeJobInitContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
+func makeJobInitContainerCommandArgs(c *v1alpha1.Pulsar) []string {
 	return []string{
-		fmt.Sprintf("export CSRF_TOKEN=$(curl http://%s:7750/pulsar-manager/csrf-token); until [ ${#CSRF_TOKEN} -ge 1 ]; do\n"+
+		fmt.Sprintf("pmServiceNumber=\"$(nslookup -timeout=10 %s | grep Name | wc -l)\"; until [ ${pmServiceNumber} -ge 1 ]; do\n"+
 			"            echo \"Pulsar Manager cluster %s isn't ready yet ... check in 10 seconds ...\";\n"+
 			"            sleep 10;\n"+
-			"            export CSRF_TOKEN=$(curl http://%s:7750/pulsar-manager/csrf-token);\n"+
+			"            pmServiceNumber=\"$(nslookup -timeout=10 %s | grep Name | wc -l)\";\n"+
 			"          done; sleep 5; echo \"Pulsar Manager cluster is ready\";", MakeServiceName(c), c.Name, MakeServiceName(c)),
 	}
 }
@@ -78,11 +82,11 @@ func makeJobInitContainerCommand() []string {
 	}
 }
 
-func makeJobInitContainerName(c *v1alpha1.PulsarCluster) string {
+func makeJobInitContainerName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("wait-pulsar-manager-ready")
 }
 
-func makeJobContainer(c *v1alpha1.PulsarCluster) corev1.Container {
+func makeJobContainer(c *v1alpha1.Pulsar) corev1.Container {
 	return corev1.Container{
 		Name:            makeJobContainerName(c),
 		Image:           c.Spec.Manager.Image.GenerateImage(),
@@ -92,11 +96,11 @@ func makeJobContainer(c *v1alpha1.PulsarCluster) corev1.Container {
 	}
 }
 
-func makeJobContainerName(c *v1alpha1.PulsarCluster) string {
+func makeJobContainerName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-init-manager-container", c.Name)
 }
 
-func makeJobContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
+func makeJobContainerCommandArgs(c *v1alpha1.Pulsar) []string {
 	return []string{
 		fmt.Sprintf("apk add curl; export CSRF_TOKEN=$(curl http://%s:7750/pulsar-manager/csrf-token);"+
 			"          curl -H \"Content-Type: application/json\" \\\n     -H \"X-XSRF-TOKEN: $CSRF_TOKEN\""+

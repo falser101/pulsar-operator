@@ -2,14 +2,14 @@ package manager
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/bookie"
+	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/bookie"
-	"pulsar-operator/pkg/component/broker"
 )
 
-func MakeConfigMap(c *cachev1alpha1.PulsarCluster) *v1.ConfigMap {
+func MakeConfigMap(c *v1alpha1.Pulsar) *v1.ConfigMap {
 	data := make(map[string]string)
 	if c.Spec.Manager.ConfigMap == nil {
 		data[BackendEntrypointKey] = MakeBackendEntrypoint(c)
@@ -28,10 +28,10 @@ func MakeConfigMap(c *cachev1alpha1.PulsarCluster) *v1.ConfigMap {
 	}
 }
 
-func MakeConfigMapName(c *cachev1alpha1.PulsarCluster) string {
+func MakeConfigMapName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-manager-configmap", c.GetName())
 }
 
-func MakeBackendEntrypoint(c *cachev1alpha1.PulsarCluster) string {
+func MakeBackendEntrypoint(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf(BackendEntrypointValue, bookie.MakeServiceName(c), c.Name, broker.MakeServiceName(c))
 }

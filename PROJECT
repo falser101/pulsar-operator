@@ -2,22 +2,22 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: example.com
+domain: my.domain
 layout:
 - go.kubebuilder.io/v3
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: pulsar-operator
-repo: pulsar-operator
+repo: github.com/falser101/pulsar-operator
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: example.com
-  group: cache
-  kind: PulsarCluster
-  path: pulsar-operator/api/v1alpha1
+  domain: my.domain
+  group: message.queue
+  kind: Pulsar
+  path: github.com/falser101/pulsar-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

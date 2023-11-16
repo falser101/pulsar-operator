@@ -2,13 +2,13 @@ package prometheus
 
 import (
 	"fmt"
-	"pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
+func MakeService(c *v1alpha1.Pulsar) *v1.Service {
 	var serviceType v1.ServiceType
 	if c.Spec.Monitor.Prometheus.NodePort == 0 {
 		serviceType = v1.ServiceTypeClusterIP
@@ -34,11 +34,11 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 	}
 }
 
-func MakeServiceName(c *v1alpha1.PulsarCluster) string {
+func MakeServiceName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-monitor-prometheus-service", c.GetName())
 }
 
-func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
+func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
 	if c.Spec.Monitor.Prometheus.NodePort == 0 {
 		return []v1.ServicePort{
 			{

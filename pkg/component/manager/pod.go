@@ -2,13 +2,13 @@ package manager
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/utils/net"
-	"pulsar-operator/pkg/api/v1alpha1"
-	"pulsar-operator/pkg/component/broker"
 )
 
-func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	p := v1.PodSpec{
 		Affinity:       c.Spec.Bookie.Pod.Affinity,
 		Containers:     []v1.Container{makeContainer(c)},
@@ -22,11 +22,11 @@ func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	return p
 }
 
-func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
+func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
 	return c.Spec.Manager.StorageClassName == ""
 }
 
-func makeInitContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeInitContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "wait-broker-ready",
 		Image:           c.Spec.AutoRecovery.Image.GenerateImage(),
@@ -36,7 +36,7 @@ func makeInitContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	}
 }
 
-func makeInitContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
+func makeInitContainerCommandArgs(c *v1alpha1.Pulsar) []string {
 	return []string{
 		fmt.Sprintf(" brokerServiceNumber=\"$(nslookup -timeout=10 %s | grep Name | wc -l)\"; until [ ${brokerServiceNumber} -ge 1 ]; do\n"+
 			"            echo \"broker cluster %s isn't ready yet ... check in 10 seconds ...\";\n"+
@@ -54,7 +54,7 @@ func makeInitContainerCommand() []string {
 	}
 }
 
-func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "manager",
 		Image:           c.Spec.Manager.Image.GenerateImage(),
@@ -91,7 +91,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	}
 }
 
-func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
+func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
 			ContainerPort: v1alpha1.PulsarManagerFrontendPort,

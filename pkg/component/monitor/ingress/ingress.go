@@ -3,7 +3,7 @@ package ingress
 //
 //import (
 //	"fmt"
-//	cachev1alpha1 "pulsar-operator/api/v1alpha1"
+//	cache"github.com/falser101/pulsar-operator/api/v1alpha1"
 //	"pulsar-operator/controllers/monitor/grafana"
 //
 //	"k8s.io/api/extensions/v1beta1"

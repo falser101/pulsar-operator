@@ -2,13 +2,13 @@ package grafana
 
 import (
 	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
 )
 
-func MakePVC(c *cachev1alpha1.PulsarCluster) *v1.PersistentVolumeClaim {
+func MakePVC(c *v1alpha1.Pulsar) *v1.PersistentVolumeClaim {
 	capacity := fmt.Sprintf("%dGi", c.Spec.Monitor.Grafana.StorageCapacity)
 	return &v1.PersistentVolumeClaim{
 		TypeMeta: metav1.TypeMeta{
@@ -27,6 +27,6 @@ func MakePVC(c *cachev1alpha1.PulsarCluster) *v1.PersistentVolumeClaim {
 	}
 }
 
-func makePVCName(c *cachev1alpha1.PulsarCluster) string {
+func makePVCName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-monitor-grafana-data-pvc", c.Name)
 }

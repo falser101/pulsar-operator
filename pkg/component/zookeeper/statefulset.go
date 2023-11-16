@@ -2,7 +2,7 @@ package zookeeper
 
 import (
 	"fmt"
-	"pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func MakeStatefulSet(c *v1alpha1.PulsarCluster) *appsv1.StatefulSet {
+func MakeStatefulSet(c *v1alpha1.Pulsar) *appsv1.StatefulSet {
 	return &appsv1.StatefulSet{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "StatefulSet",
@@ -25,11 +25,11 @@ func MakeStatefulSet(c *v1alpha1.PulsarCluster) *appsv1.StatefulSet {
 	}
 }
 
-func MakeStatefulSetName(c *v1alpha1.PulsarCluster) string {
+func MakeStatefulSetName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-zookeeper-statefulset", c.GetName())
 }
 
-func makeStatefulSetPodNameList(c *v1alpha1.PulsarCluster) []string {
+func makeStatefulSetPodNameList(c *v1alpha1.Pulsar) []string {
 	result := make([]string, 0)
 	for i := 0; i < int(c.Spec.Zookeeper.Size); i++ {
 		result = append(result, fmt.Sprintf("%s-%s", MakeStatefulSetName(c), strconv.Itoa(i)))
@@ -37,8 +37,8 @@ func makeStatefulSetPodNameList(c *v1alpha1.PulsarCluster) []string {
 	return result
 }
 
-func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
-	s := appsv1.StatefulSetSpec{
+func makeStatefulSetSpec(c *v1alpha1.Pulsar) appsv1.StatefulSetSpec {
+	return appsv1.StatefulSetSpec{
 		ServiceName: MakeServiceName(c),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
@@ -50,13 +50,9 @@ func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 			Type: appsv1.RollingUpdateStatefulSetStrategyType,
 		},
 	}
-	if !isUseEmptyDirVolume(c) {
-		s.VolumeClaimTemplates = makeVolumeClaimTemplates(c)
-	}
-	return s
 }
 
-func makeStatefulSetPodTemplate(c *v1alpha1.PulsarCluster) v1.PodTemplateSpec {
+func makeStatefulSetPodTemplate(c *v1alpha1.Pulsar) v1.PodTemplateSpec {
 	return v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: c.GetName(),

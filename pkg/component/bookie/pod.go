@@ -1,12 +1,12 @@
 package bookie
 
 import (
-	"pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	"k8s.io/api/core/v1"
 )
 
-func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
+func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	p := v1.PodSpec{
 		Affinity:       c.Spec.Bookie.Pod.Affinity,
 		Containers:     []v1.Container{makeContainer(c)},
@@ -20,7 +20,7 @@ func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	return p
 }
 
-func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "bookie",
 		Image:           c.Spec.Bookie.Image.GenerateImage(),
@@ -46,7 +46,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 
 func makeContainerCommand() []string {
 	return []string{
-		"bash",
+		"sh",
 		"-c",
 	}
 }
@@ -54,11 +54,12 @@ func makeContainerCommand() []string {
 func makeContainerCommandArgs() []string {
 	return []string{
 		"bin/apply-config-from-env.py conf/bookkeeper.conf && " +
+			"bin/apply-config-from-env.py conf/pulsar_env.sh && " +
 			"bin/pulsar bookie",
 	}
 }
 
-func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
+func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
 			Name:          "client",
@@ -68,42 +69,12 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 	}
 }
 
-func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
-	return []v1.EnvVar{
-		{
-			Name: "POD_NAME",
-			ValueFrom: &v1.EnvVarSource{
-				FieldRef: &v1.ObjectFieldSelector{
-					APIVersion: "v1",
-					FieldPath:  "metadata.name",
-				},
-			},
-		},
-		{
-			Name: "POD_NAMESPACE",
-			ValueFrom: &v1.EnvVarSource{
-				FieldRef: &v1.ObjectFieldSelector{
-					APIVersion: "v1",
-					FieldPath:  "metadata.namespace",
-				},
-			},
-		},
-		{
-			Name:  "VOLUME_NAME",
-			Value: makeJournalDataVolumeName(c),
-		},
-		{
-			Name:  "BOOKIE_PORT",
-			Value: "3181",
-		},
-		{
-			Name:  "BOOKIE_RACK_AWARE_ENABLED",
-			Value: "true",
-		},
-	}
+func makeContainerEnv(c *v1alpha1.Pulsar) []v1.EnvVar {
+	env := make([]v1.EnvVar, 0)
+	return env
 }
 
-func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
+func makeContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 	froms := make([]v1.EnvFromSource, 0)
 
 	var configRef v1.ConfigMapEnvSource
@@ -113,11 +84,11 @@ func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 	return froms
 }
 
-func makeInitContainer(c *v1alpha1.PulsarCluster) v1.Container {
+func makeInitContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
-		Name:            "bookie-init",
-		Image:           c.Spec.Bookie.Image.GenerateImage(),
-		ImagePullPolicy: c.Spec.Bookie.Image.PullPolicy,
+		Name:            "bookie-metaformat",
+		Image:           c.Spec.AutoRecovery.Image.GenerateImage(),
+		ImagePullPolicy: c.Spec.AutoRecovery.Image.PullPolicy,
 		Command:         makeInitContainerCommand(),
 		Args:            makeInitContainerCommandArgs(),
 		EnvFrom:         makeInitContainerEnvFrom(c),
@@ -133,14 +104,12 @@ func makeInitContainerCommand() []string {
 
 func makeInitContainerCommandArgs() []string {
 	return []string{
-		`set -e; bin/apply-config-from-env.py conf/bookkeeper.conf;until bin/bookkeeper shell whatisinstanceid; do
-            echo "bookie not init"
-            sleep 3;
-          done;`,
+		"bin/apply-config-from-env.py conf/bookkeeper.conf && " +
+			"bin/bookkeeper shell metaformat --nonInteractive || true;",
 	}
 }
 
-func makeInitContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
+func makeInitContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 	froms := make([]v1.EnvFromSource, 0)
 
 	var configRef v1.ConfigMapEnvSource
@@ -150,6 +119,6 @@ func makeInitContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 	return froms
 }
 
-func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
+func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
 	return c.Spec.Bookie.StorageClassName == ""
 }

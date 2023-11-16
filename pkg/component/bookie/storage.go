@@ -2,30 +2,30 @@ package bookie
 
 import (
 	"fmt"
-	cachev1alpha1 "pulsar-operator/pkg/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func makeJournalDataVolumeName(c *cachev1alpha1.PulsarCluster) string {
+func makeJournalDataVolumeName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("journal-disk-volume-pvc")
 }
 
-func makeLedgersDataVolumeName(c *cachev1alpha1.PulsarCluster) string {
+func makeLedgersDataVolumeName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("ledgers-disk-volume-pvc")
 }
 
 // PV/PVC
-func makeVolumeClaimTemplates(c *cachev1alpha1.PulsarCluster) []v1.PersistentVolumeClaim {
+func makeVolumeClaimTemplates(c *v1alpha1.Pulsar) []v1.PersistentVolumeClaim {
 	return []v1.PersistentVolumeClaim{
 		makeJournalDataVolumeClaimTemplate(c),
 		makeLedgersDataVolumeClaimTemplate(c),
 	}
 }
 
-func makeJournalDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaim {
+func makeJournalDataVolumeClaimTemplate(c *v1alpha1.Pulsar) v1.PersistentVolumeClaim {
 	return v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      makeJournalDataVolumeName(c),
@@ -35,7 +35,7 @@ func makeJournalDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.Persi
 	}
 }
 
-func makeJournalDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaimSpec {
+func makeJournalDataVolumeClaimSpec(c *v1alpha1.Pulsar) v1.PersistentVolumeClaimSpec {
 	capacity := fmt.Sprintf("%dGi", c.Spec.Bookie.JournalStorageCapacity)
 	return v1.PersistentVolumeClaimSpec{
 		AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce},
@@ -44,7 +44,7 @@ func makeJournalDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.Persisten
 	}
 }
 
-func makeLedgersDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaim {
+func makeLedgersDataVolumeClaimTemplate(c *v1alpha1.Pulsar) v1.PersistentVolumeClaim {
 	return v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      makeLedgersDataVolumeName(c),
@@ -54,7 +54,7 @@ func makeLedgersDataVolumeClaimTemplate(c *cachev1alpha1.PulsarCluster) v1.Persi
 	}
 }
 
-func makeLedgersDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.PersistentVolumeClaimSpec {
+func makeLedgersDataVolumeClaimSpec(c *v1alpha1.Pulsar) v1.PersistentVolumeClaimSpec {
 	capacity := fmt.Sprintf("%dGi", c.Spec.Bookie.LedgersStorageCapacity)
 	return v1.PersistentVolumeClaimSpec{
 		AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce},
@@ -64,7 +64,7 @@ func makeLedgersDataVolumeClaimSpec(c *cachev1alpha1.PulsarCluster) v1.Persisten
 }
 
 // EmptyDir volume
-func makeEmptyDirVolume(c *cachev1alpha1.PulsarCluster) []v1.Volume {
+func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 	return []v1.Volume{
 		{
 			Name:         makeJournalDataVolumeName(c),
