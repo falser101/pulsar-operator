@@ -2,10 +2,11 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	"github.com/falser101/pulsar-operator/pkg/component/broker"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,5 +34,5 @@ func MakeConfigMapName(c *v1alpha1.Pulsar) string {
 }
 
 func MakeBackendEntrypoint(c *v1alpha1.Pulsar) string {
-	return fmt.Sprintf(BackendEntrypointValue, bookie.MakeServiceName(c), c.Name, broker.MakeServiceName(c))
+	return fmt.Sprintf(BackendEntrypointValue, bookie.MakeServiceName(c), c.GetName(), broker.MakeServiceName(c), c.GetNamespace())
 }

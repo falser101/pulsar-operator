@@ -42,6 +42,9 @@ const (
 	// BookieComponent bookie
 	BookieComponent = "bookie"
 
+	// ProxyComponent bookie
+	ProxyComponent = "proxy"
+
 	// AutoRecoveryComponent autoRecovery
 	AutoRecoveryComponent = "autoRecovery"
 

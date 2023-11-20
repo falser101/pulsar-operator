@@ -42,6 +42,10 @@ type PulsarSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Bookie Bookie `json:"bookie,omitempty"`
 
+	// Proxy defines the desired state of Proxy
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	Proxy Proxy `json:"proxy,omitempty"`
+
 	// AutoRecovery defines the desired state of AutoRecovery
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	AutoRecovery AutoRecovery `json:"autoRecovery,omitempty"`
@@ -73,6 +77,9 @@ func (s *PulsarSpec) SetDefault(c *Pulsar) bool {
 		changed = true
 	}
 	if s.Monitor.SetDefault(c) {
+		changed = true
+	}
+	if s.Proxy.SetDefault(c) {
 		changed = true
 	}
 	return changed

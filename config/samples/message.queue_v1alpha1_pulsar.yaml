@@ -16,6 +16,8 @@ spec:
   bookie:
     size: 1
     storageClassName: openebs-hostpath
+  proxy:
+    size: 1
   autoRecovery:
     size: 1
   manager:
