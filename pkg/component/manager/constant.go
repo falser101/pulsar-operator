@@ -24,7 +24,8 @@ const (
       --default.environment.name=%s \
       --default.environment.service_url=http://%s:8080 \
       --tls.enabled=false \
-      --pulsar.peek.message=true`
+      --pulsar.peek.message=true \
+      --kubernetes.namespace=%s`
 
 	EntrypointValue = `
 apk add --update openssl && rm -rf /var/cache/apk/*;

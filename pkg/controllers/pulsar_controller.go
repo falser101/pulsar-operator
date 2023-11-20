@@ -119,6 +119,7 @@ func (r *PulsarClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		r.reconcileBookie,
 		r.reconcileAutoRecovery,
 		r.reconcileBroker,
+		r.reconcileProxy,
 		r.reconcileManager,
 		r.reconcileMonitor,
 		r.reconcilePulsarCluster,
