@@ -14,7 +14,7 @@ RUN go mod download
 
 # Copy the go source
 COPY main.go main.go
-COPY ../../go/src/pulsar-operator/api/ api/
+COPY api/ api/
 COPY pkg/ pkg/
 
 # Build
