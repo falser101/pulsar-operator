@@ -3,7 +3,7 @@ package bookie
 import (
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
@@ -54,7 +54,6 @@ func makeContainerCommand() []string {
 func makeContainerCommandArgs() []string {
 	return []string{
 		"bin/apply-config-from-env.py conf/bookkeeper.conf && " +
-			"bin/apply-config-from-env.py conf/pulsar_env.sh && " +
 			"bin/pulsar bookie",
 	}
 }
@@ -71,6 +70,34 @@ func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 
 func makeContainerEnv(c *v1alpha1.Pulsar) []v1.EnvVar {
 	env := make([]v1.EnvVar, 0)
+	env = append(env, v1.EnvVar{
+		Name: "POD_NAME",
+		ValueFrom: &v1.EnvVarSource{
+			FieldRef: &v1.ObjectFieldSelector{
+				FieldPath:  "metadata.name",
+				APIVersion: "v1",
+			},
+		}})
+	env = append(env, v1.EnvVar{
+		Name: "POD_NAMESPACE",
+		ValueFrom: &v1.EnvVarSource{
+			FieldRef: &v1.ObjectFieldSelector{
+				FieldPath:  "metadata.namespace",
+				APIVersion: "v1",
+			},
+		}})
+	env = append(env, v1.EnvVar{
+		Name:  "VOLUME_NAME",
+		Value: c.Name + "-bookie-journal",
+	})
+	env = append(env, v1.EnvVar{
+		Name:  "BOOKIE_PORT",
+		Value: "3181",
+	})
+	env = append(env, v1.EnvVar{
+		Name:  "BOOKIE_RACK_AWARE_ENABLED",
+		Value: "true",
+	})
 	return env
 }
 
@@ -104,8 +131,9 @@ func makeInitContainerCommand() []string {
 
 func makeInitContainerCommandArgs() []string {
 	return []string{
-		"bin/apply-config-from-env.py conf/bookkeeper.conf && " +
-			"bin/bookkeeper shell metaformat --nonInteractive || true;",
+		`set -e; bin/apply-config-from-env.py conf/bookkeeper.conf;until bin/bookkeeper shell whatisinstanceid; do
+			sleep 3;
+		done;`,
 	}
 }
 
