@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -31,7 +32,7 @@ func makeManagerDataName(c *v1alpha1.Pulsar) string {
 func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 	var scriptMode int32 = 493
 	var tokenMode int32 = 420
-	return []v1.Volume{
+	var volumes = []v1.Volume{
 		{
 			Name:         makeManagerDataName(c),
 			VolumeSource: v1.VolumeSource{EmptyDir: &v1.EmptyDirVolumeSource{}},
@@ -52,7 +53,9 @@ func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 					DefaultMode:          &scriptMode,
 				}},
 		},
-		{
+	}
+	if c.Spec.Broker.Authentication.Enabled {
+		volumes = append(volumes, v1.Volume{
 			Name: makeManagerTokenKeysName(c),
 			VolumeSource: v1.VolumeSource{
 				Secret: &v1.SecretVolumeSource{
@@ -69,21 +72,23 @@ func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 					},
 					DefaultMode: &tokenMode,
 				}}},
-		{
-			Name: makeManagerTokensName(c),
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
-					SecretName: makeManagerAdminSecretName(c),
-					Items: []v1.KeyToPath{
-						{
-							Key:  "TOKEN",
-							Path: "pulsar_manager/token",
+			v1.Volume{
+				Name: makeManagerTokensName(c),
+				VolumeSource: v1.VolumeSource{
+					Secret: &v1.SecretVolumeSource{
+						SecretName: makeManagerAdminSecretName(c),
+						Items: []v1.KeyToPath{
+							{
+								Key:  "TOKEN",
+								Path: "pulsar_manager/token",
+							},
 						},
-					},
-					DefaultMode: &tokenMode,
-				}},
-		},
+						DefaultMode: &tokenMode,
+					}},
+			})
 	}
+
+	return volumes
 }
 
 func makeManagerAdminSecretName(c *v1alpha1.Pulsar) string {

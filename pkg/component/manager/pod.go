@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	v1 "k8s.io/api/core/v1"
@@ -55,6 +56,35 @@ func makeInitContainerCommand() []string {
 }
 
 func makeContainer(c *v1alpha1.Pulsar) v1.Container {
+	var volumeMounts = []v1.VolumeMount{
+		{
+			Name:      makeManagerDataName(c),
+			MountPath: "/data",
+		},
+		{
+			Name:      makeManagerScriptName(c),
+			MountPath: "/pulsar-manager/pulsar-manager.sh",
+			SubPath:   EntrypointKey,
+		},
+		{
+			Name:      makeManagerBackendScriptName(c),
+			MountPath: "/pulsar-manager/pulsar-backend-entrypoint.sh",
+			SubPath:   BackendEntrypointKey,
+		},
+	}
+	if c.Spec.Broker.Authentication.Enabled {
+		volumeMounts = append(volumeMounts,
+			v1.VolumeMount{
+				Name:      makeManagerTokenKeysName(c),
+				MountPath: "/pulsar/keys",
+				ReadOnly:  true,
+			},
+			v1.VolumeMount{
+				Name:      makeManagerTokensName(c),
+				MountPath: "/pulsar/tokens",
+				ReadOnly:  true,
+			})
+	}
 	return v1.Container{
 		Name:            "manager",
 		Image:           c.Spec.Manager.Image.GenerateImage(),
@@ -62,32 +92,7 @@ func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 		Command:         makeContainerCommand(),
 		Args:            makeContainerCommandArgs(),
 		Ports:           makeContainerPort(c),
-		VolumeMounts: []v1.VolumeMount{
-			{
-				Name:      makeManagerDataName(c),
-				MountPath: "/data",
-			},
-			{
-				Name:      makeManagerScriptName(c),
-				MountPath: "/pulsar-manager/pulsar-manager.sh",
-				SubPath:   EntrypointKey,
-			},
-			{
-				Name:      makeManagerBackendScriptName(c),
-				MountPath: "/pulsar-manager/pulsar-backend-entrypoint.sh",
-				SubPath:   BackendEntrypointKey,
-			},
-			{
-				Name:      makeManagerTokenKeysName(c),
-				MountPath: "/pulsar/keys",
-				ReadOnly:  true,
-			},
-			{
-				Name:      makeManagerTokensName(c),
-				MountPath: "/pulsar/tokens",
-				ReadOnly:  true,
-			},
-		},
+		VolumeMounts:    volumeMounts,
 	}
 }
 

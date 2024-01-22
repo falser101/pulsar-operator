@@ -4,7 +4,7 @@ const (
 	BackendEntrypointKey = "backend_entrypoint.sh"
 	EntrypointKey        = "entrypoint.sh"
 
-	BackendEntrypointValue = `/pulsar-manager/tongpulsar_console/bin/tongpulsar_console \
+	BackendEntrypointValue = `/pulsar-manager/pulsar-manager/bin/pulsar-manager \
       --sync.cluster.interval=60000 \
       --spring.datasource.initialization-mode=never \
       --spring.datasource.driver-class-name=org.postgresql.Driver \
@@ -12,10 +12,6 @@ const (
       --spring.datasource.username=pulsar \
       --spring.datasource.password=pulsar \
       --pagehelper.helperDialect=postgresql \
-      --backend.jwt.token="$(cat /pulsar/tokens/pulsar_manager/token)" \
-      --jwt.broker.token.mode=PRIVATE \
-      --jwt.broker.public.key=file:///pulsar/keys/token/public.key \
-      --jwt.broker.private.key=file:///pulsar/keys/token/private.key \
       --bookie.host="http://%s:8000" \
       --bookie.enable=true \
       --redirect.scheme=http \
@@ -24,8 +20,7 @@ const (
       --default.environment.name=%s \
       --default.environment.service_url=http://%s:8080 \
       --tls.enabled=false \
-      --pulsar.peek.message=true \
-      --kubernetes.namespace=%s`
+      --pulsar.peek.message=true `
 
 	EntrypointValue = `
 apk add --update openssl && rm -rf /var/cache/apk/*;
