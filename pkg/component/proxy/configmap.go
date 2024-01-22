@@ -4,28 +4,24 @@ import (
 	"fmt"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func MakeConfigMap(c *v1alpha1.Pulsar) *v1.ConfigMap {
 	var configData = map[string]string{
-		"PULSAR_GC":                            PulsarGC,
-		"PULSAR_MEM":                           PulsarMem,
-		"authenticationProviders":              "org.apache.pulsar.broker.authentication.AuthenticationProviderToken",
-		"authorizationEnabled":                 "false",
-		"brokerClientAuthenticationParameters": "file:///pulsar/tokens/proxy/token",
-		"brokerClientAuthenticationPlugin":     "org.apache.pulsar.client.impl.auth.AuthenticationToken",
-		"brokerServiceURL":                     fmt.Sprintf("pulsar://%s:6650", MakeServiceName(c)),
-		"brokerWebServiceURL":                  fmt.Sprintf("http://%s:8080", MakeServiceName(c)),
-		"clusterName":                          "pulsar-cluster",
-		"forwardAuthorizationCredentials":      "true",
-		"httpNumThreads":                       "8",
-		"servicePort":                          "6650",
-		"statusFilePath":                       "/pulsar/status",
-		"superUserRoles":                       "broker-admin,proxy-admin,ws-admin,admin,console-admin",
-		"tokenPublicKey":                       "file:///pulsar/keys/token/public.key",
-		"webServicePort":                       "8080",
+		"PULSAR_GC":                       PulsarGC,
+		"PULSAR_MEM":                      PulsarMem,
+		"authorizationEnabled":            "false",
+		"brokerServiceURL":                fmt.Sprintf("pulsar://%s:6650", broker.MakeServiceName(c)),
+		"brokerWebServiceURL":             fmt.Sprintf("http://%s:8080", broker.MakeServiceName(c)),
+		"clusterName":                     "pulsar-cluster",
+		"forwardAuthorizationCredentials": "true",
+		"httpNumThreads":                  "8",
+		"servicePort":                     "6650",
+		"statusFilePath":                  "/pulsar/status",
+		"webServicePort":                  "8080",
 		"log4j2.yaml": `
 Configuration:
 status: INFO
@@ -175,6 +171,11 @@ Loggers:
 	}
 	if c.Spec.Broker.Authentication.Enabled {
 		configData["authenticationEnabled"] = "true"
+		configData["authenticationProviders"] = "org.apache.pulsar.broker.authentication.AuthenticationProviderToken"
+		configData["brokerClientAuthenticationParameters"] = "file:///pulsar/tokens/proxy/token"
+		configData["brokerClientAuthenticationPlugin"] = "org.apache.pulsar.client.impl.auth.AuthenticationToken"
+		configData["tokenPublicKey"] = "file:///pulsar/keys/token/public.key"
+		configData["superUserRoles"] = "broker-admin,proxy-admin,ws-admin,admin,console-admin"
 	}
 	return &v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
