@@ -66,6 +66,26 @@ func makeWaitZookeeperReadyContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSour
 }
 
 func makeContainer(c *v1alpha1.Pulsar) v1.Container {
+	var volumeMounts = []v1.VolumeMount{
+		{
+			Name:      makeLog4j2Name(c),
+			MountPath: "/pulsar/conf/log4j2.yaml",
+			SubPath:   "log4j2.yaml",
+		},
+	}
+	if c.Spec.Broker.Authentication.Enabled {
+		volumeMounts = append(volumeMounts,
+			v1.VolumeMount{
+				Name:      "token-keys",
+				MountPath: "/pulsar/keys",
+				ReadOnly:  true,
+			},
+			v1.VolumeMount{
+				Name:      "proxy-token",
+				MountPath: "/pulsar/tokens",
+				ReadOnly:  true,
+			})
+	}
 	return v1.Container{
 		Name:            "proxy",
 		Image:           c.Spec.Proxy.Image.GenerateImage(),
@@ -106,23 +126,7 @@ func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 				},
 			},
 		},
-		VolumeMounts: []v1.VolumeMount{
-			{
-				Name:      makeLog4j2Name(c),
-				MountPath: "/pulsar/conf/log4j2.yaml",
-				SubPath:   "log4j2.yaml",
-			},
-			{
-				Name:      "token-keys",
-				MountPath: "/pulsar/keys",
-				ReadOnly:  true,
-			},
-			{
-				Name:      "proxy-token",
-				MountPath: "/pulsar/tokens",
-				ReadOnly:  true,
-			},
-		},
+		VolumeMounts: volumeMounts,
 	}
 }
 
@@ -170,7 +174,7 @@ func makeLog4j2Name(c *v1alpha1.Pulsar) string {
 
 func makeVolumes(c *v1alpha1.Pulsar) []v1.Volume {
 	var defaultMode int32 = 420
-	return []v1.Volume{
+	var volumes = []v1.Volume{
 		{
 			Name: makeLog4j2Name(c),
 			VolumeSource: v1.VolumeSource{
@@ -180,35 +184,39 @@ func makeVolumes(c *v1alpha1.Pulsar) []v1.Volume {
 				},
 			},
 		},
-		{
-			Name: "token-keys",
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
-					SecretName: fmt.Sprintf("%s-token-asymmetric-key", c.Name),
-					Items: []v1.KeyToPath{
-						{
-							Key:  "PUBLICKEY",
-							Path: "token/public.key",
-						},
-					},
-					DefaultMode: &defaultMode,
-				},
-			},
-		},
-		{
-			Name: "proxy-token",
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
-					SecretName: fmt.Sprintf("%s-token-proxy-admin", c.Name),
-					Items: []v1.KeyToPath{
-						{
-							Key:  "TOKEN",
-							Path: "proxy/token",
-						},
-					},
-					DefaultMode: &defaultMode,
-				},
-			},
-		},
 	}
+	if c.Spec.Broker.Authentication.Enabled {
+		volumes = append(volumes,
+			v1.Volume{
+				Name: "token-keys",
+				VolumeSource: v1.VolumeSource{
+					Secret: &v1.SecretVolumeSource{
+						SecretName: fmt.Sprintf("%s-token-asymmetric-key", c.Name),
+						Items: []v1.KeyToPath{
+							{
+								Key:  "PUBLICKEY",
+								Path: "token/public.key",
+							},
+						},
+						DefaultMode: &defaultMode,
+					},
+				},
+			},
+			v1.Volume{
+				Name: "proxy-token",
+				VolumeSource: v1.VolumeSource{
+					Secret: &v1.SecretVolumeSource{
+						SecretName: fmt.Sprintf("%s-token-proxy-admin", c.Name),
+						Items: []v1.KeyToPath{
+							{
+								Key:  "TOKEN",
+								Path: "proxy/token",
+							},
+						},
+						DefaultMode: &defaultMode,
+					},
+				},
+			})
+	}
+	return volumes
 }

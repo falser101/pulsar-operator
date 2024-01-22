@@ -34,5 +34,11 @@ func MakeConfigMapName(c *v1alpha1.Pulsar) string {
 }
 
 func MakeBackendEntrypoint(c *v1alpha1.Pulsar) string {
-	return fmt.Sprintf(BackendEntrypointValue, bookie.MakeServiceName(c), c.GetName(), broker.MakeServiceName(c), c.GetNamespace())
+	if c.Spec.Broker.Authentication.Enabled {
+		return fmt.Sprintf(BackendEntrypointValue, bookie.MakeServiceName(c), c.GetName(), broker.MakeServiceName(c)) + `--backend.jwt.token=$(cat /pulsar/tokens/pulsar_manager/token) \
+		--jwt.broker.token.mode=PRIVATE \
+		--jwt.broker.public.key=file:///pulsar/keys/token/public.key \
+		--jwt.broker.private.key=file:///pulsar/keys/token/private.key \`
+	}
+	return fmt.Sprintf(BackendEntrypointValue, bookie.MakeServiceName(c), c.GetName(), broker.MakeServiceName(c))
 }

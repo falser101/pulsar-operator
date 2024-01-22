@@ -12,10 +12,10 @@ spec:
   broker:
     size: 1
   zookeeper:
-    size: 3
+    size: 1
   bookie:
     size: 1
-    storageClassName: openebs-hostpath
+    storageClassName: nfs-client
   proxy:
     size: 1
   autoRecovery:
@@ -23,7 +23,7 @@ spec:
   manager:
     size: 1
     image:
-      repository: 10.10.55.29:30003/tonglinkq-cn/tlq-cn-console
-      tag: 60-amd
+      repository: pulsar-manager
+      tag: latest
   monitor:
     enable: false
