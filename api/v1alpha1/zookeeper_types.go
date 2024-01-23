@@ -16,6 +16,11 @@ type Zookeeper struct {
 	//
 	// Updating the pod does not take effect on any existing pods.
 	Pod PodPolicy `json:"pod,omitempty"`
+
+	// Storage class name
+	//
+	// PVC of storage class name
+	StorageClassName string `json:"storageClassName,omitempty"`
 }
 
 func (z *Zookeeper) SetDefault(c *Pulsar) bool {
