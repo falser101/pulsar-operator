@@ -2,11 +2,12 @@ package zookeeper
 
 import (
 	"fmt"
-	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"strconv"
 
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,7 +39,7 @@ func makeStatefulSetPodNameList(c *v1alpha1.Pulsar) []string {
 }
 
 func makeStatefulSetSpec(c *v1alpha1.Pulsar) appsv1.StatefulSetSpec {
-	return appsv1.StatefulSetSpec{
+	var spec = appsv1.StatefulSetSpec{
 		ServiceName: MakeServiceName(c),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
@@ -50,6 +51,10 @@ func makeStatefulSetSpec(c *v1alpha1.Pulsar) appsv1.StatefulSetSpec {
 			Type: appsv1.RollingUpdateStatefulSetStrategyType,
 		},
 	}
+	if !isUseEmptyDirVolume(c) {
+		spec.VolumeClaimTemplates = makeVolumeClaimTemplates(c)
+	}
+	return spec
 }
 
 func makeStatefulSetPodTemplate(c *v1alpha1.Pulsar) v1.PodTemplateSpec {

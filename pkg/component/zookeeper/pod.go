@@ -2,10 +2,11 @@ package zookeeper
 
 import (
 	"fmt"
-	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"strings"
 
-	"k8s.io/api/core/v1"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
+
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/policy/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -36,18 +37,14 @@ func MakePodDisruptionBudgetName(c *v1alpha1.Pulsar) string {
 }
 
 func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
-	return v1.PodSpec{
+	var p = v1.PodSpec{
 		Affinity:   c.Spec.Zookeeper.Pod.Affinity,
 		Containers: []v1.Container{makeContainer(c)},
-		Volumes: []v1.Volume{
-			{
-				Name: ContainerDataVolumeName,
-				VolumeSource: v1.VolumeSource{
-					EmptyDir: &v1.EmptyDirVolumeSource{},
-				},
-			},
-		},
 	}
+	if isUseEmptyDirVolume(c) {
+		p.Volumes = makeEmptyDirVolume(c)
+	}
+	return p
 }
 
 func makeContainer(c *v1alpha1.Pulsar) v1.Container {
@@ -130,4 +127,8 @@ func makeContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 
 	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
 	return froms
+}
+
+func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
+	return c.Spec.Zookeeper.StorageClassName == ""
 }
