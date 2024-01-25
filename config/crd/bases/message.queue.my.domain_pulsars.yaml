@@ -2755,6 +2755,13 @@ spec:
                   validate the value More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
                   Broker defines the desired state of Broker'
                 properties:
+                  auth:
+                    properties:
+                      enabled:
+                        description: Authentication is the authentication policy for
+                          the broker cluster.
+                        type: boolean
+                    type: object
                   image:
                     description: Image is the  container image. default is apachepulsar/pulsar-all:latest
                     properties:
@@ -3710,6 +3717,7 @@ spec:
                               - name
                               type: object
                             type: array
+                            
                           limits:
                             additionalProperties:
                               anyOf:
@@ -5072,6 +5080,7 @@ spec:
                               - name
                               type: object
                             type: array
+                            
                           limits:
                             additionalProperties:
                               anyOf:
@@ -6498,6 +6507,7 @@ spec:
                                   - name
                                   type: object
                                 type: array
+                                
                               limits:
                                 additionalProperties:
                                   anyOf:
@@ -7939,6 +7949,7 @@ spec:
                                   - name
                                   type: object
                                 type: array
+                                
                               limits:
                                 additionalProperties:
                                   anyOf:
@@ -9310,6 +9321,7 @@ spec:
                               - name
                               type: object
                             type: array
+                            
                           limits:
                             additionalProperties:
                               anyOf:
@@ -10662,12 +10674,13 @@ spec:
                               - name
                               type: object
                             type: array
+                            
                           limits:
                             additionalProperties:
                               anyOf:
                               - type: integer
                               - type: string
-                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]x-kubernetes-list-type=set*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                               x-kubernetes-int-or-string: true
                             description: 'Limits describes the maximum amount of compute
                               resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
@@ -11055,6 +11068,12 @@ spec:
                       cluster.
                     format: int32
                     type: integer
+                  storageCapacity:
+                    format: int32
+                    type: integer
+                  storageClassName:
+                    description: "Storage class name \n PVC of storage class name"
+                    type: string
                 type: object
             type: object
           status:
