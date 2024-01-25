@@ -21,6 +21,8 @@ type Zookeeper struct {
 	//
 	// PVC of storage class name
 	StorageClassName string `json:"storageClassName,omitempty"`
+
+	StorageCapacity int32 `json:"storageCapacity,omitempty"`
 }
 
 func (z *Zookeeper) SetDefault(c *Pulsar) bool {
@@ -32,6 +34,11 @@ func (z *Zookeeper) SetDefault(c *Pulsar) bool {
 
 	if z.Size == 0 {
 		z.Size = ZookeeperClusterDefaultNodeNum
+		changed = true
+	}
+
+	if z.StorageClassName != "" && z.StorageCapacity == 0 {
+		z.StorageCapacity = ZookeeperClusterDefaultStorageCapacity
 		changed = true
 	}
 

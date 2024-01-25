@@ -168,8 +168,9 @@ const (
 	// LedgersStorageDefaultCapacity ledgers storage default capacity
 	LedgersStorageDefaultCapacity = 10
 
-	PrometheusStorageDefaultCapacity = 10
-	GrafanaStorageDefaultCapacity    = 10
+	PrometheusStorageDefaultCapacity       = 10
+	GrafanaStorageDefaultCapacity          = 10
+	ZookeeperClusterDefaultStorageCapacity = 10
 )
 
 const (

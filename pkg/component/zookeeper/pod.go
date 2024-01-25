@@ -72,7 +72,7 @@ func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 		},
 
 		VolumeMounts: []v1.VolumeMount{
-			{Name: ContainerDataVolumeName, MountPath: ContainerDataPath},
+			{Name: makeZookeeperDateVolumeName(c), MountPath: ContainerDataPath},
 		},
 	}
 }

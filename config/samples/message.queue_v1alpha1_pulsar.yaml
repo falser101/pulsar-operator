@@ -13,6 +13,7 @@ spec:
     size: 1
   zookeeper:
     size: 1
+    storageClassName: nfs-client
   bookie:
     size: 1
     storageClassName: nfs-client
