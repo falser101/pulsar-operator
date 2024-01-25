@@ -154,33 +154,31 @@ func (r *PulsarClusterReconciler) reconcilePulsarCluster(c *v1alpha1.Pulsar) err
 
 // Init pulsar metaData
 func (r *PulsarClusterReconciler) reconcileInitPulsarClusterMetaData(c *v1alpha1.Pulsar) (err error) {
-	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase && r.isZookeeperRunning(c) {
-		job := metadata.MakeInitClusterMetaDataJob(c)
+	job := metadata.MakeInitClusterMetaDataJob(c)
 
-		jobCur := &batchv1.Job{}
-		err = r.client.Get(context.TODO(), types.NamespacedName{
-			Name:      job.Name,
-			Namespace: job.Namespace,
-		}, jobCur)
-		if err != nil && errors.IsNotFound(err) {
-			if err = controllerutil.SetControllerReference(c, job, r.scheme); err != nil {
-				return err
-			}
+	jobCur := &batchv1.Job{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      job.Name,
+		Namespace: job.Namespace,
+	}, jobCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, job, r.scheme); err != nil {
+			return err
+		}
 
-			if err = r.client.Create(context.TODO(), job); err == nil {
-				r.log.Info("Start init pulsar cluster metaData job",
-					"Job.Namespace", job.Namespace,
-					"Job.Name", job.Name)
-			}
+		if err = r.client.Create(context.TODO(), job); err == nil {
+			r.log.Info("Start init pulsar cluster metaData job",
+				"Job.Namespace", job.Namespace,
+				"Job.Name", job.Name)
+		}
 
-		} else if err == nil && jobCur.Status.Succeeded == 1 {
-			// Init pulsar cluster success
-			c.Status.Phase = v1alpha1.PulsarClusterLaunchingPhase
-			if err = r.client.Status().Update(context.TODO(), c); err == nil {
-				r.log.Info("Init pulsar cluster metaData success",
-					"PulsarCluster.Namespace", c.Namespace,
-					"PulsarCluster.Name", c.Name)
-			}
+	} else if err == nil && jobCur.Status.Succeeded == 1 {
+		// Init pulsar cluster success
+		c.Status.Phase = v1alpha1.PulsarClusterLaunchingPhase
+		if err = r.client.Status().Update(context.TODO(), c); err == nil {
+			r.log.Info("Init pulsar cluster metaData success",
+				"PulsarCluster.Namespace", c.Namespace,
+				"PulsarCluster.Name", c.Name)
 		}
 	}
 	return

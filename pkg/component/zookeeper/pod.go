@@ -132,3 +132,28 @@ func makeContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
 func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
 	return c.Spec.Zookeeper.StorageClassName == ""
 }
+
+func MakeWaitZookeeperReadyContainer(c *v1alpha1.Pulsar) v1.Container {
+	return v1.Container{
+		Name:            "wait-zookeeper-ready",
+		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
+		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
+		Command:         makeContainerCommand(),
+		Args:            makeWaitZookeeperReadyContainerCommandArgs(c),
+		EnvFrom:         makeWaitZookeeperReadyContainerEnvFrom(c),
+	}
+}
+
+func makeWaitZookeeperReadyContainerCommandArgs(c *v1alpha1.Pulsar) []string {
+	return []string{
+		fmt.Sprintf(`until bin/pulsar zookeeper-shell -server %s-zookeeper-service get /admin/clusters/%s; do
+		sleep 3;
+		done;`, c.GetName(), c.GetName()),
+	}
+}
+
+func makeWaitZookeeperReadyContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
+	return []v1.EnvFromSource{
+		{ConfigMapRef: &v1.ConfigMapEnvSource{LocalObjectReference: v1.LocalObjectReference{Name: MakeConfigMapName(c)}}},
+	}
+}

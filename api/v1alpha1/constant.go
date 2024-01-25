@@ -141,6 +141,9 @@ const (
 	// PulsarBookieServerPort Bookie server port
 	PulsarBookieServerPort = 3181
 
+	// PulsarBookieClientPort Bookie client port
+	PulsarBookieClientPort = 8000
+
 	// PulsarGrafanaServerPort Grafana server port
 	PulsarGrafanaServerPort = 3000
 

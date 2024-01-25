@@ -2,18 +2,19 @@ package metadata
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	"github.com/falser101/pulsar-operator/pkg/component/zookeeper"
-	"k8s.io/api/batch/v1"
+	v1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	JobContainerName = "pulsar-cluster-metadata-init-container"
-
-	ComponentName = "init-cluster-metadata-job"
+	JobContainerName     = "pulsar-cluster-metadata-job"
+	JobInitContainerName = JobContainerName + "-init"
+	ComponentName        = "init-cluster-metadata-job"
 )
 
 func MakeInitClusterMetaDataJob(c *v1alpha1.Pulsar) *v1.Job {
@@ -48,9 +49,20 @@ func makePodTemplate(c *v1alpha1.Pulsar) corev1.PodTemplateSpec {
 			Labels:       v1alpha1.MakeComponentLabels(c, ComponentName),
 		},
 		Spec: corev1.PodSpec{
-			Containers:    []corev1.Container{makeContainer(c)},
-			RestartPolicy: corev1.RestartPolicyNever,
+			InitContainers: []corev1.Container{makeInitContainer(c)},
+			Containers:     []corev1.Container{makeContainer(c)},
+			RestartPolicy:  corev1.RestartPolicyNever,
 		},
+	}
+}
+
+func makeInitContainer(c *v1alpha1.Pulsar) corev1.Container {
+	return corev1.Container{
+		Name:            JobInitContainerName,
+		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
+		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
+		Command:         makeContainerCommand(),
+		Args:            makeContainerCommandArgs(c),
 	}
 }
 

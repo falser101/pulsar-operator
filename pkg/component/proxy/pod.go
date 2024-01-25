@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/broker"
+	"github.com/falser101/pulsar-operator/pkg/component/zookeeper"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -12,56 +14,11 @@ func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	return v1.PodSpec{
 		Affinity: c.Spec.Broker.Pod.Affinity,
 		InitContainers: []v1.Container{
-			makeWaitZookeeperReadyContainer(c),
-			makeWaitBrokerReadyContainer(c),
+			zookeeper.MakeWaitZookeeperReadyContainer(c),
+			broker.MakeWaitBrokerReadyContainer(c),
 		},
 		Containers: []v1.Container{makeContainer(c)},
 		Volumes:    makeVolumes(c),
-	}
-}
-
-func makeWaitBrokerReadyContainer(c *v1alpha1.Pulsar) v1.Container {
-	return v1.Container{
-		Name:            "wait-broker-ready",
-		Image:           c.Spec.Proxy.Image.GenerateImage(),
-		ImagePullPolicy: c.Spec.Proxy.Image.PullPolicy,
-		Command:         makeContainerCommand(),
-		Args:            makeWaitBrokerReadyContainerCommandArgs(c),
-	}
-}
-
-func makeWaitBrokerReadyContainerCommandArgs(c *v1alpha1.Pulsar) []string {
-	return []string{
-		fmt.Sprintf(`set -e; brokerServiceNumber="$(nslookup -timeout=10 %s-broker-service | grep Name | wc -l)"; until [ ${brokerServiceNumber} -ge 1 ]; do
-			echo "pulsar cluster test-tonglinkq isn't initialized yet ... check in 10 seconds ...";
-			sleep 10;
-			brokerServiceNumber="$(nslookup -timeout=10 %s-broker-service | grep Name | wc -l)";
-        done;`, c.GetName(), c.GetName()),
-	}
-}
-
-func makeWaitZookeeperReadyContainer(c *v1alpha1.Pulsar) v1.Container {
-	return v1.Container{
-		Name:            "wait-zookeeper-ready",
-		Image:           c.Spec.Proxy.Image.GenerateImage(),
-		ImagePullPolicy: c.Spec.Proxy.Image.PullPolicy,
-		Command:         makeContainerCommand(),
-		Args:            makeWaitZookeeperReadyContainerCommandArgs(c),
-		EnvFrom:         makeWaitZookeeperReadyContainerEnvFrom(c),
-	}
-}
-
-func makeWaitZookeeperReadyContainerCommandArgs(c *v1alpha1.Pulsar) []string {
-	return []string{
-		fmt.Sprintf(`until bin/pulsar zookeeper-shell -server %s-zookeeper-service get /admin/clusters/%s; do
-		sleep 3;
-		done;`, c.GetName(), c.GetName()),
-	}
-}
-
-func makeWaitZookeeperReadyContainerEnvFrom(c *v1alpha1.Pulsar) []v1.EnvFromSource {
-	return []v1.EnvFromSource{
-		{ConfigMapRef: &v1.ConfigMapEnvSource{LocalObjectReference: v1.LocalObjectReference{Name: MakeConfigMapName(c)}}},
 	}
 }
 

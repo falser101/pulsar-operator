@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	appsv1 "k8s.io/api/apps/v1"
@@ -12,9 +13,9 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.Pulsar) error {
-	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
-		return nil
-	}
+	// if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
+	// 	return nil
+	// }
 
 	for _, fun := range []reconcileFunc{
 		r.reconcileBookieConfigMap,
