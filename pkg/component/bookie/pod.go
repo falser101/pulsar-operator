@@ -2,15 +2,19 @@ package bookie
 
 import (
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/zookeeper"
 
 	v1 "k8s.io/api/core/v1"
 )
 
 func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
 	p := v1.PodSpec{
-		Affinity:       c.Spec.Bookie.Pod.Affinity,
-		Containers:     []v1.Container{makeContainer(c)},
-		InitContainers: []v1.Container{makeInitContainer(c)},
+		Affinity:   c.Spec.Bookie.Pod.Affinity,
+		Containers: []v1.Container{makeContainer(c)},
+		InitContainers: []v1.Container{
+			zookeeper.MakeWaitZookeeperReadyContainer(c),
+			makeInitContainer(c),
+		},
 	}
 
 	if isUseEmptyDirVolume(c) {
@@ -30,7 +34,6 @@ func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 		Ports:           makeContainerPort(c),
 		Env:             makeContainerEnv(c),
 		EnvFrom:         makeContainerEnvFrom(c),
-
 		VolumeMounts: []v1.VolumeMount{
 			{
 				Name:      makeJournalDataVolumeName(c),
@@ -61,8 +64,13 @@ func makeContainerCommandArgs() []string {
 func makeContainerPort(c *v1alpha1.Pulsar) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
-			Name:          "client",
+			Name:          "server",
 			ContainerPort: v1alpha1.PulsarBookieServerPort,
+			Protocol:      v1.ProtocolTCP,
+		},
+		{
+			Name:          "client",
+			ContainerPort: v1alpha1.PulsarBookieClientPort,
 			Protocol:      v1.ProtocolTCP,
 		},
 	}

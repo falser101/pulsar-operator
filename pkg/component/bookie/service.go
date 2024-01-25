@@ -2,9 +2,10 @@ package bookie
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -36,6 +37,10 @@ func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
 		{
 			Name: "server",
 			Port: v1alpha1.PulsarBookieServerPort,
+		},
+		{
+			Name: "client",
+			Port: v1alpha1.PulsarBookieClientPort,
 		},
 	}
 }
