@@ -16,13 +16,6 @@ type Broker struct {
 	//
 	// Updating the pod does not take effect on any existing pods.
 	Pod PodPolicy `json:"pod,omitempty"`
-
-	Authentication Authentication `json:"auth,omitempty"`
-}
-
-type Authentication struct {
-	// Authentication is the authentication policy for the broker cluster.
-	Enabled bool `json:"enabled,omitempty"`
 }
 
 func (b *Broker) SetDefault(cluster *Pulsar) bool {
