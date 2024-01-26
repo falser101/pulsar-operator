@@ -13,10 +13,6 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.Pulsar) error {
-	// if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
-	// 	return nil
-	// }
-
 	for _, fun := range []reconcileFunc{
 		r.reconcileBookieConfigMap,
 		r.reconcileBookieStatefulSet,

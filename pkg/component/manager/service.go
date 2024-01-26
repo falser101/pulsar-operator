@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +13,6 @@ func MakeServiceName(c *v1alpha1.Pulsar) string {
 }
 
 func MakeService(c *v1alpha1.Pulsar) *v1.Service {
-
 	return &v1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -32,33 +32,24 @@ func MakeService(c *v1alpha1.Pulsar) *v1.Service {
 }
 
 func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
-	var servicePorts = make([]v1.ServicePort, 0, 2)
-	if c.Spec.Manager.FrontendNodePort == 0 {
-		servicePorts = append(servicePorts, v1.ServicePort{
-			Name:     "frontend",
-			NodePort: v1alpha1.PulsarManagerFrontendNodePort,
-			Port:     v1alpha1.PulsarManagerFrontendPort,
-		})
-	} else {
-		servicePorts = append(servicePorts, v1.ServicePort{
-			Name:     "frontend",
-			NodePort: c.Spec.Manager.FrontendNodePort,
-			Port:     v1alpha1.PulsarManagerFrontendPort,
-		})
+	var frontendNodePort, backendNodePort int32
+	if c.Spec.Manager.FrontendNodePort != 0 {
+		frontendNodePort = c.Spec.Manager.FrontendNodePort
 	}
 
-	if c.Spec.Manager.BackendNodePort == 0 {
-		servicePorts = append(servicePorts, v1.ServicePort{
-			Name:     "backend",
-			NodePort: v1alpha1.PulsarManagerBackNodePort,
-			Port:     v1alpha1.PulsarManagerBackendPort,
-		})
-	} else {
-		servicePorts = append(servicePorts, v1.ServicePort{
-			Name:     "backend",
-			NodePort: c.Spec.Manager.BackendNodePort,
-			Port:     v1alpha1.PulsarManagerBackendPort,
-		})
+	if c.Spec.Manager.BackendNodePort != 0 {
+		backendNodePort = c.Spec.Manager.BackendNodePort
 	}
-	return servicePorts
+	return []v1.ServicePort{
+		{
+			Name:     "frontend",
+			NodePort: frontendNodePort,
+			Port:     v1alpha1.PulsarManagerFrontendPort,
+		},
+		{
+			Name:     "backend",
+			NodePort: backendNodePort,
+			Port:     v1alpha1.PulsarManagerBackendPort,
+		},
+	}
 }

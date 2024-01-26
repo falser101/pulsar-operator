@@ -30,8 +30,8 @@ func isUseEmptyDirVolume(c *v1alpha1.Pulsar) bool {
 func makeInitContainer(c *v1alpha1.Pulsar) v1.Container {
 	return v1.Container{
 		Name:            "wait-broker-ready",
-		Image:           c.Spec.AutoRecovery.Image.GenerateImage(),
-		ImagePullPolicy: c.Spec.AutoRecovery.Image.PullPolicy,
+		Image:           c.Spec.Broker.Image.GenerateImage(),
+		ImagePullPolicy: c.Spec.Broker.Image.PullPolicy,
 		Command:         makeInitContainerCommand(),
 		Args:            makeInitContainerCommandArgs(c),
 	}

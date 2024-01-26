@@ -12,10 +12,6 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileAutoRecovery(c *v1alpha1.Pulsar) error {
-	if c.Status.Phase == v1alpha1.PulsarClusterInitializingPhase {
-		return nil
-	}
-
 	for _, fun := range []reconcileFunc{
 		r.reconcileBookieAutoRecoveryDeployment,
 	} {

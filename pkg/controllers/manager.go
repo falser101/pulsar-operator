@@ -13,9 +13,6 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileManager(c *v1alpha1.Pulsar) (err error) {
-	if c.Status.Phase != v1alpha1.PulsarClusterRunningPhase {
-		return
-	}
 	for _, fun := range []reconcileFunc{
 		r.reconcileManagerConfigMap,
 		r.reconcileManagerStatefulSet,
