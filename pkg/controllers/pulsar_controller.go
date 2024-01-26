@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/pkg/component/metadata"
 	"github.com/go-logr/logr"
@@ -146,6 +147,10 @@ func (r *PulsarClusterReconciler) reconcilePulsarCluster(c *v1alpha1.Pulsar) err
 		return err
 	}
 
+	if err := r.reconcileAuthentication(c); err != nil {
+		return err
+	}
+
 	if err := r.reconcilePulsarClusterPhase(c); err != nil {
 		return err
 	}
@@ -194,6 +199,15 @@ func (r *PulsarClusterReconciler) reconcilePulsarClusterPhase(c *v1alpha1.Pulsar
 			r.log.Info("start pulsar cluster success",
 				"PulsarCluster.Namespace", c.Namespace,
 				"PulsarCluster.Name", c.Name)
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileAuthentication(c *v1alpha1.Pulsar) (err error) {
+	if c.Spec.Authentication.Enabled {
+		if c.Spec.Authentication.Provider == v1alpha1.JWT {
+			
 		}
 	}
 	return
