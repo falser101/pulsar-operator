@@ -16,6 +16,9 @@ type Proxy struct {
 	//
 	// Updating the pod does not take effect on any existing pods.
 	Pod PodPolicy `json:"pod,omitempty"`
+
+	HttpServerPort   int32 `json:"httpServerPort,omitempty"`
+	PulsarServerPort int32 `json:"pulsarServerPort,omitempty"`
 }
 
 func (p *Proxy) SetDefault(cluster *Pulsar) bool {

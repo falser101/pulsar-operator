@@ -34,6 +34,13 @@ func MakeServiceName(c *v1alpha1.Pulsar) string {
 }
 
 func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
+	var httpServerPort, pulsarServerPort int32
+	if c.Spec.Proxy.HttpServerPort != 0 {
+		httpServerPort = c.Spec.Proxy.HttpServerPort
+	}
+	if c.Spec.Proxy.PulsarServerPort != 0 {
+		pulsarServerPort = c.Spec.Proxy.PulsarServerPort
+	}
 	return []v1.ServicePort{
 		{
 			Name: "http",
@@ -41,7 +48,7 @@ func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
 			TargetPort: intstr.IntOrString{
 				IntVal: v1alpha1.PulsarBrokerHttpServerPort,
 			},
-			NodePort: 30080,
+			NodePort: httpServerPort,
 		},
 		{
 			Name: "pulsar",
@@ -49,7 +56,7 @@ func makeServicePorts(c *v1alpha1.Pulsar) []v1.ServicePort {
 			TargetPort: intstr.IntOrString{
 				IntVal: v1alpha1.PulsarBrokerPulsarServerPort,
 			},
-			NodePort: 30650,
+			NodePort: pulsarServerPort,
 		},
 	}
 }

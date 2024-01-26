@@ -17,9 +17,6 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileMonitor(c *v1alpha1.Pulsar) error {
-	if c.Status.Phase != v1alpha1.PulsarClusterRunningPhase {
-		return nil
-	}
 	if !c.Spec.Monitor.Enable {
 		return nil
 	}

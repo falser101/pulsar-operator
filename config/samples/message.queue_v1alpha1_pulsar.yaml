@@ -20,9 +20,9 @@ spec:
   proxy:
     size: 1
   autoRecovery:
-    size: 1
+    size: 0
   manager:
-    size: 1
+    size: 0
     image:
       repository: pulsar-manager
       tag: latest
