@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/authentication"
 	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	v1 "k8s.io/api/core/v1"
 )
