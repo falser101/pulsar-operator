@@ -47,8 +47,14 @@ func GenerateAsymmetricKey(c *v1alpha1.Pulsar) (private []byte, public []byte, e
 	if err != nil {
 		return
 	}
+	if err = os.Remove("private.key"); err != nil {
+		return
+	}
 	public, err = os.ReadFile("public.key")
 	if err != nil {
+		return
+	}
+	if err = os.RemoveAll("public.key"); err != nil {
 		return
 	}
 	return
@@ -63,6 +69,9 @@ func GenerateTokenKey(c *v1alpha1.Pulsar) (token []byte, err error) {
 	fmt.Println("exec result:", string(output))
 	token, err = os.ReadFile("broker-admin")
 	if err != nil {
+		return
+	}
+	if err = os.Remove("broker-admin"); err != nil {
 		return
 	}
 	return
