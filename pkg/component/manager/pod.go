@@ -72,7 +72,7 @@ func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 			SubPath:   BackendEntrypointKey,
 		},
 	}
-	if c.Spec.Broker.Authentication.Enabled {
+	if c.Spec.Authentication.Enabled {
 		volumeMounts = append(volumeMounts,
 			v1.VolumeMount{
 				Name:      makeManagerTokenKeysName(c),
