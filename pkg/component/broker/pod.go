@@ -112,10 +112,11 @@ func makeContainerCommand() []string {
 
 func makeContainerCommandArgs() []string {
 	return []string{
-		"bin/apply-config-from-env.py conf/broker.conf && " +
-			"bin/apply-config-from-env.py conf/pulsar_env.sh && " +
-			"bin/gen-yml-from-env.py conf/functions_worker.yml && " +
-			"bin/pulsar broker",
+		"bin/apply-config-from-env.py conf/broker.conf;" +
+			"bin/apply-config-from-env.py conf/client.conf;" +
+			"echo \"OK\" > status;" +
+			"cat conf/pulsar_env.sh;" +
+			"OPTS=\"${OPTS} -Dlog4j2.formatMsgNoLookups=true\" exec bin/pulsar broker;",
 	}
 }
 

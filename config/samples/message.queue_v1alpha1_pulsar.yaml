@@ -11,20 +11,38 @@ metadata:
 spec:
   broker:
     size: 1
+    image:
+      repository: docker.io/apachepulsar/pulsar-all
+      tag: 3.1.0
   zookeeper:
     size: 1
     storageClassName: nfs-client
+    image:
+      repository: docker.io/apachepulsar/pulsar-all
+      tag: 3.1.0
   bookie:
     size: 1
     storageClassName: nfs-client
+    image:
+      repository: docker.io/apachepulsar/pulsar-all
+      tag: 3.1.0
   proxy:
     size: 1
+    image:
+      repository: docker.io/apachepulsar/pulsar-all
+      tag: 3.1.0
   autoRecovery:
     size: 0
+    image:
+      repository: docker.io/apachepulsar/pulsar-all
+      tag: 3.1.0
   manager:
     size: 0
     image:
       repository: pulsar-manager
       tag: latest
+  authentication:
+    enabled: true
+    provider: jwt
   monitor:
     enable: false
