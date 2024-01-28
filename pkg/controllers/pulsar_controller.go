@@ -203,12 +203,3 @@ func (r *PulsarClusterReconciler) reconcilePulsarClusterPhase(c *v1alpha1.Pulsar
 	}
 	return
 }
-
-func (r *PulsarClusterReconciler) reconcileAuthentication(c *v1alpha1.Pulsar) (err error) {
-	if c.Spec.Authentication.Enabled {
-		if c.Spec.Authentication.Provider == v1alpha1.JWT {
-			
-		}
-	}
-	return
-}

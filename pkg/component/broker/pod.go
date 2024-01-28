@@ -4,16 +4,58 @@ import (
 	"fmt"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/pkg/component/authentication"
 	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	v1 "k8s.io/api/core/v1"
 )
 
 func makePodSpec(c *v1alpha1.Pulsar) v1.PodSpec {
-	return v1.PodSpec{
+	var podSepc = v1.PodSpec{
 		Affinity:       c.Spec.Broker.Pod.Affinity,
 		InitContainers: []v1.Container{makeWaitBookieReadyContainer(c)},
 		Containers:     []v1.Container{makeContainer(c)},
 	}
+	if c.Spec.Authentication.Enabled {
+		podSepc.Volumes = MakeAuthenticationVolumes(c)
+	}
+	return podSepc
+}
+
+func MakeAuthenticationVolumes(c *v1alpha1.Pulsar) []v1.Volume {
+	return []v1.Volume{
+		{
+			Name: "token-keys",
+			VolumeSource: v1.VolumeSource{
+				Secret: &v1.SecretVolumeSource{
+					SecretName: authentication.MakeSecretName(c),
+					Items: []v1.KeyToPath{
+						{
+							Key:  "PUBLICKEY",
+							Path: "token/public.key",
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "broker-token",
+			VolumeSource: v1.VolumeSource{
+				Secret: &v1.SecretVolumeSource{
+					SecretName: MakeBrokerTokenName(c),
+					Items: []v1.KeyToPath{
+						{
+							Key:  "TOKEN",
+							Path: "broker/token",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func MakeBrokerTokenName(c *v1alpha1.Pulsar) string {
+	return fmt.Sprintf("%s-token-broker-admin", c.Name)
 }
 
 func makeWaitBookieReadyContainer(c *v1alpha1.Pulsar) v1.Container {
@@ -33,7 +75,7 @@ func makeWaitBookieReadyContainer(c *v1alpha1.Pulsar) v1.Container {
 }
 
 func makeContainer(c *v1alpha1.Pulsar) v1.Container {
-	return v1.Container{
+	var container = v1.Container{
 		Name:            "broker",
 		Image:           c.Spec.Broker.Image.GenerateImage(),
 		ImagePullPolicy: c.Spec.Broker.Image.PullPolicy,
@@ -43,6 +85,22 @@ func makeContainer(c *v1alpha1.Pulsar) v1.Container {
 		Env:             makeContainerEnv(c),
 		EnvFrom:         makeContainerEnvFrom(c),
 	}
+	if c.Spec.Authentication.Enabled {
+		container.VolumeMounts = append(
+			container.VolumeMounts,
+			v1.VolumeMount{
+				Name:      "token-keys",
+				ReadOnly:  true,
+				MountPath: "/pulsar/keys",
+			},
+			v1.VolumeMount{
+				Name:      "broker-token",
+				ReadOnly:  true,
+				MountPath: "/pulsar/tokens",
+			},
+		)
+	}
+	return container
 }
 
 func makeContainerCommand() []string {
