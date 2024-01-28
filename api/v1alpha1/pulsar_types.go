@@ -60,8 +60,6 @@ type PulsarSpec struct {
 
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Authentication Authentication `json:"authentication,omitempty"`
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	Authorization bool `json:"authorization,omitempty"`
 }
 
 func (s *PulsarSpec) SetDefault(c *Pulsar) bool {

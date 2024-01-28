@@ -169,7 +169,7 @@ Loggers:
 #             ref: filter.js
 `,
 	}
-	if c.Spec.Broker.Authentication.Enabled {
+	if c.Spec.Authentication.Enabled {
 		configData["authenticationEnabled"] = "true"
 		configData["authenticationProviders"] = "org.apache.pulsar.broker.authentication.AuthenticationProviderToken"
 		configData["brokerClientAuthenticationParameters"] = "file:///pulsar/tokens/proxy/token"

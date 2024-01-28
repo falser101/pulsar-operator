@@ -54,7 +54,7 @@ func makeEmptyDirVolume(c *v1alpha1.Pulsar) []v1.Volume {
 				}},
 		},
 	}
-	if c.Spec.Broker.Authentication.Enabled {
+	if c.Spec.Authentication.Enabled {
 		volumes = append(volumes, v1.Volume{
 			Name: makeManagerTokenKeysName(c),
 			VolumeSource: v1.VolumeSource{
