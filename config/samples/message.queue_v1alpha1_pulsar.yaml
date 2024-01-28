@@ -41,5 +41,8 @@ spec:
     image:
       repository: pulsar-manager
       tag: latest
+  authentication:
+    enabled: true
+    provider: jwt
   monitor:
     enable: false

@@ -1,7 +1,7 @@
 package broker
 
 const (
-	PulsarMemData = "\" -Xms64m -Xmx128m -XX:MaxDirectMemorySize=128m\""
+	PulsarMemData = "-Xms1024m -Xmx1024m -XX:MaxDirectMemorySize=1024m"
 
 	ManagedLedgerDefaultEnsembleSize = "1"
 
@@ -9,7 +9,7 @@ const (
 
 	ManagedLedgerDefaultAckQuorum = "1"
 
-	FunctionsWorkerEnabled = "true"
+	FunctionsWorkerEnabled = "false"
 
 	AdvertisedAddress = "advertisedAddress"
 )
