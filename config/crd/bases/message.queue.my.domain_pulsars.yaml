@@ -35,6 +35,15 @@ spec:
           spec:
             description: PulsarSpec defines the desired state of Pulsar
             properties:
+              authentication:
+                properties:
+                  enabled:
+                    description: Authentication is the authentication policy for the
+                      broker cluster.
+                    type: boolean
+                  provider:
+                    type: string
+                type: object
               autoRecovery:
                 description: AutoRecovery defines the desired state of AutoRecovery
                 properties:
@@ -2757,13 +2766,6 @@ spec:
                   validate the value More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
                   Broker defines the desired state of Broker'
                 properties:
-                  auth:
-                    properties:
-                      enabled:
-                        description: Authentication is the authentication policy for
-                          the broker cluster.
-                        type: boolean
-                    type: object
                   image:
                     description: Image is the  container image. default is apachepulsar/pulsar-all:latest
                     properties:
