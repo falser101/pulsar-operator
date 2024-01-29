@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kubectl-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: kubectl
+        image: token:latest
+        command: ["/pulsar/scripts/pulsar/prepare_helm_release.sh", "-n", "default", "-k", "pulsar-sample"] 
+      restartPolicy: Never
+  backoffLimit: 4
