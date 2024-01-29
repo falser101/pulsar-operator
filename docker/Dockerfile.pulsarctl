@@ -1,0 +1,5 @@
+FROM bitnami/kubectl:latest
+
+WORKDIR /pulsar
+
+COPY scripts/ /pulsar
