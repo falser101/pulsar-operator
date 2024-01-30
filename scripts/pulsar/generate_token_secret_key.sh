@@ -76,7 +76,6 @@ done
 
 source ${CHART_HOME}/scripts/pulsar/common_auth.sh
 
-echo "1111111111111111111111"
 pulsar::ensure_pulsarctl
 
 namespace=${namespace:-pulsar}
