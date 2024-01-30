@@ -119,60 +119,10 @@ func (r *PulsarClusterReconciler) isBrokerRunning(c *v1alpha1.Pulsar) bool {
 
 func (r *PulsarClusterReconciler) reconcileAuthentication(c *v1alpha1.Pulsar) (err error) {
 	if c.Spec.Authentication.Enabled {
-		if c.Spec.Authentication.Provider == v1alpha1.JWT {
-			secret := authentication.MakeSecret(c)
-			secretCur := &v1.Secret{}
-			err = r.client.Get(context.TODO(), types.NamespacedName{
-				Namespace: secret.Namespace,
-				Name:      secret.Name,
-			}, secretCur)
-			if err != nil {
-				if errors.IsNotFound(err) {
-					if err = controllerutil.SetControllerReference(c, secret, r.scheme); err != nil {
-						return err
-					}
-					privateData, publicData, err := authentication.GenerateAsymmetricKey(c)
-					if err != nil {
-						return err
-					}
-					secret.Data = map[string][]byte{
-						"PRIVATEKEY": privateData,
-						"PUBLICKEY":  publicData,
-					}
-					if err = r.client.Create(context.TODO(), secret); err == nil {
-						r.log.Info("Create pulsar broker secret success",
-							"Broker Private And Public key Secret.Namespace", c.Namespace,
-							"Broker Private And Public key Secret.Name", secret.GetName())
-					}
-				}
-				return
-			}
-			brokerSecret := authentication.MakeBrokerSecret(c)
-			brokerSecretCur := &v1.Secret{}
-			err = r.client.Get(context.TODO(), types.NamespacedName{
-				Namespace: brokerSecret.Namespace,
-				Name:      brokerSecret.Name,
-			}, brokerSecretCur)
-			if err != nil && errors.IsNotFound(err) {
-				if err = controllerutil.SetControllerReference(c, brokerSecret, r.scheme); err != nil {
-					return err
-				}
-				tokenData, err := authentication.GenerateTokenKey(c)
-				if err != nil {
-					return err
-				}
-				brokerSecret.Data = map[string][]byte{
-					"TOKEN": tokenData,
-					"TYPE":  []byte("asymmetric"),
-				}
-				if err = r.client.Create(context.TODO(), brokerSecret); err == nil {
-					r.log.Info("Create pulsar broker token success",
-						"Broker TOKEN Secret.Namespace", c.Namespace,
-						"Broker TOKEN Secret.Name", secret.GetName())
-				}
-			}
-			return
-		}
+		authentication.MakeServiceAccount(c)
+		authentication.MakeRole(c)
+		authentication.MakeRoleBinding(c)
+		authentication.MakeJob(c)
 	}
 	return
 }
