@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
-	"github.com/falser101/pulsar-operator/pkg/component/authentication"
 	"github.com/falser101/pulsar-operator/pkg/component/bookie"
 	v1 "k8s.io/api/core/v1"
 )
@@ -27,7 +26,7 @@ func MakeAuthenticationVolumes(c *v1alpha1.Pulsar) []v1.Volume {
 			Name: "token-keys",
 			VolumeSource: v1.VolumeSource{
 				Secret: &v1.SecretVolumeSource{
-					SecretName: authentication.MakeSecretName(c),
+					SecretName: MakeAsymmetricKey(c),
 					Items: []v1.KeyToPath{
 						{
 							Key:  "PUBLICKEY",
@@ -56,6 +55,10 @@ func MakeAuthenticationVolumes(c *v1alpha1.Pulsar) []v1.Volume {
 
 func MakeBrokerTokenName(c *v1alpha1.Pulsar) string {
 	return fmt.Sprintf("%s-token-broker-admin", c.Name)
+}
+
+func MakeAsymmetricKey(c *v1alpha1.Pulsar) string {
+	return fmt.Sprintf("%s-token-asymmetric-key", c.Name)
 }
 
 func makeWaitBookieReadyContainer(c *v1alpha1.Pulsar) v1.Container {
