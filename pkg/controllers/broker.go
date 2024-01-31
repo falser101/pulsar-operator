@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
-	"github.com/falser101/pulsar-operator/pkg/component/authentication"
 	"github.com/falser101/pulsar-operator/pkg/component/broker"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -115,14 +114,4 @@ func (r *PulsarClusterReconciler) isBrokerRunning(c *v1alpha1.Pulsar) bool {
 		Namespace: dm.Namespace,
 	}, dmCur)
 	return err == nil && dmCur.Status.ReadyReplicas == c.Spec.Broker.Replicas
-}
-
-func (r *PulsarClusterReconciler) reconcileAuthentication(c *v1alpha1.Pulsar) (err error) {
-	if c.Spec.Authentication.Enabled {
-		authentication.MakeServiceAccount(c)
-		authentication.MakeRole(c)
-		authentication.MakeRoleBinding(c)
-		authentication.MakeJob(c)
-	}
-	return
 }
