@@ -46,13 +46,13 @@ func (r *PulsarClusterReconciler) reconcileProxyStatefulset(c *v1alpha1.Pulsar) 
 	} else if err != nil {
 		return err
 	} else {
-		if c.Spec.Zookeeper.Size != *ssCur.Spec.Replicas {
+		if c.Spec.Zookeeper.Replicas != *ssCur.Spec.Replicas {
 			old := *ssCur.Spec.Replicas
-			ssCur.Spec.Replicas = &c.Spec.Zookeeper.Size
+			ssCur.Spec.Replicas = &c.Spec.Zookeeper.Replicas
 			if err = r.client.Update(context.TODO(), ssCur); err == nil {
 				r.log.Info("Scale pulsar zookeeper statefulSet success",
 					"OldSize", old,
-					"NewSize", c.Spec.Zookeeper.Size)
+					"NewSize", c.Spec.Zookeeper.Replicas)
 			}
 		}
 	}

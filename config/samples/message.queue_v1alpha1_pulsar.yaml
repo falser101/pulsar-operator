@@ -11,15 +11,30 @@ metadata:
 spec:
   broker:
     size: 1
+    image:
+      repository: apachepulsar/pulsar-all
+      tag: latest
   zookeeper:
     size: 1
+    image:
+      repository: apachepulsar/pulsar-all
+      tag: latest
     storageClassName: nfs-client
   bookie:
     size: 1
+    image:
+      repository: apachepulsar/pulsar-all
+      tag: latest
     storageClassName: nfs-client
   proxy:
+    image:
+      repository: apachepulsar/pulsar-all
+      tag: latest
     size: 1
   autoRecovery:
+    image:
+      repository: apachepulsar/pulsar-all
+      tag: latest
     size: 0
   manager:
     size: 0

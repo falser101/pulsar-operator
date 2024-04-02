@@ -9,8 +9,8 @@ type Broker struct {
 	// the broker cluster.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Size (DEPRECATED) is the expected size of the broker cluster.
-	Size int32 `json:"size,omitempty"`
+	// Replicas is the expected size of the broker cluster.
+	Replicas int32 `json:"replicas,omitempty"`
 
 	// Pod defines the policy to create pod for the broker cluster.
 	//
@@ -32,8 +32,8 @@ func (b *Broker) SetDefault(cluster *Pulsar) bool {
 		changed = true
 	}
 
-	if b.Size == 0 {
-		b.Size = BrokerClusterDefaultNodeNum
+	if b.Replicas == 0 {
+		b.Replicas = BrokerClusterDefaultNodeNum
 		changed = true
 	}
 

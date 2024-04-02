@@ -9,8 +9,8 @@ type Zookeeper struct {
 	// the broker cluster.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Size (DEPRECATED) is the expected size of the broker cluster.
-	Size int32 `json:"size,omitempty"`
+	// Replicas is the expected size of the broker cluster.
+	Replicas int32 `json:"replicas,omitempty"`
 
 	// Pod defines the policy to create pod for the broker cluster.
 	//
@@ -32,8 +32,8 @@ func (z *Zookeeper) SetDefault(c *Pulsar) bool {
 		changed = true
 	}
 
-	if z.Size == 0 {
-		z.Size = ZookeeperClusterDefaultNodeNum
+	if z.Replicas == 0 {
+		z.Replicas = ZookeeperClusterDefaultNodeNum
 		changed = true
 	}
 

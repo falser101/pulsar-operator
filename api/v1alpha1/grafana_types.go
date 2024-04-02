@@ -18,9 +18,9 @@ type Grafana struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Size (DEPRECATED) is the expected size of the broker cluster.
+	// Replicas is the expected size of the broker cluster.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	Size int32 `json:"size,omitempty"`
+	Replicas int32 `json:"replicas,omitempty"`
 
 	// Pod defines the policy to create pod for the broker cluster.
 	//
@@ -44,8 +44,8 @@ func (g *Grafana) SetDefault(c *Pulsar) bool {
 		changed = true
 	}
 
-	if g.Size == 0 {
-		g.Size = 1
+	if g.Replicas == 0 {
+		g.Replicas = 1
 		changed = true
 	}
 

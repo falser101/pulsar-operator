@@ -34,7 +34,7 @@ func makeStatefulSetSpec(c *v1alpha1.Pulsar) appsv1.StatefulSetSpec {
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ProxyComponent),
 		},
-		Replicas: &c.Spec.Proxy.Size,
+		Replicas: &c.Spec.Proxy.Replicas,
 		Template: makeStatefulSetPodTemplate(c),
 	}
 }

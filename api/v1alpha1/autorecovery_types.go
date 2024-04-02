@@ -26,14 +26,8 @@ func (b *AutoRecovery) SetDefault(cluster *Pulsar) bool {
 		changed = true
 	}
 
-	if b.Size == 0 {
-		b.Size = BookieClusterDefaultNodeNum
-		changed = true
-	}
-
 	if b.Pod.SetDefault(cluster, AutoRecoveryComponent) {
 		changed = true
 	}
-
 	return changed
 }

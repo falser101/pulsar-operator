@@ -2,10 +2,11 @@ package bookie
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,7 +35,7 @@ func makeStatefulSetSpec(c *v1alpha1.Pulsar) appsv1.StatefulSetSpec {
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.BookieComponent),
 		},
-		Replicas:            &c.Spec.Bookie.Size,
+		Replicas:            &c.Spec.Bookie.Replicas,
 		Template:            makeStatefulSetPodTemplate(c),
 		PodManagementPolicy: appsv1.OrderedReadyPodManagement,
 		UpdateStrategy: appsv1.StatefulSetUpdateStrategy{

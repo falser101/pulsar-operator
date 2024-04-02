@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/pkg/component/zookeeper"
 	appsv1 "k8s.io/api/apps/v1"
@@ -70,13 +71,13 @@ func (r *PulsarClusterReconciler) reconcileZookeeperStatefulSet(c *v1alpha1.Puls
 	} else if err != nil {
 		return err
 	} else {
-		if c.Spec.Zookeeper.Size != *ssCur.Spec.Replicas {
+		if c.Spec.Zookeeper.Replicas != *ssCur.Spec.Replicas {
 			old := *ssCur.Spec.Replicas
-			ssCur.Spec.Replicas = &c.Spec.Zookeeper.Size
+			ssCur.Spec.Replicas = &c.Spec.Zookeeper.Replicas
 			if err = r.client.Update(context.TODO(), ssCur); err == nil {
 				r.log.Info("Scale pulsar zookeeper statefulSet success",
 					"OldSize", old,
-					"NewSize", c.Spec.Zookeeper.Size)
+					"NewSize", c.Spec.Zookeeper.Replicas)
 			}
 		}
 	}
@@ -140,7 +141,7 @@ func (r *PulsarClusterReconciler) isZookeeperRunning(c *v1alpha1.Pulsar) bool {
 		Namespace: c.Namespace,
 	}, ss)
 	if err == nil {
-		return ss.Status.ReadyReplicas == c.Spec.Zookeeper.Size
+		return ss.Status.ReadyReplicas == c.Spec.Zookeeper.Replicas
 	}
 	return false
 }

@@ -9,8 +9,8 @@ type Proxy struct {
 	// the proxy cluster.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Size (DEPRECATED) is the expected size of the proxy cluster.
-	Size int32 `json:"size,omitempty"`
+	// Replicas is the expected size of the proxy cluster.
+	Replicas int32 `json:"replicas,omitempty"`
 
 	// Pod defines the policy to create pod for the proxy cluster.
 	//
@@ -28,8 +28,8 @@ func (p *Proxy) SetDefault(cluster *Pulsar) bool {
 		changed = true
 	}
 
-	if p.Size == 0 {
-		p.Size = ProxyClusterDefaultNodeNum
+	if p.Replicas == 0 {
+		p.Replicas = ProxyClusterDefaultNodeNum
 		changed = true
 	}
 

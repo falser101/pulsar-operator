@@ -69,13 +69,13 @@ func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.Pulsar) 
 	} else if err != nil {
 		return err
 	} else {
-		if c.Spec.Broker.Size != *dmCur.Spec.Replicas {
+		if c.Spec.Broker.Replicas != *dmCur.Spec.Replicas {
 			old := *dmCur.Spec.Replicas
-			dmCur.Spec.Replicas = &c.Spec.Broker.Size
+			dmCur.Spec.Replicas = &c.Spec.Broker.Replicas
 			if err = r.client.Update(context.TODO(), dmCur); err == nil {
 				r.log.Info("Scale pulsar broker deployment success",
 					"OldSize", old,
-					"NewSize", c.Spec.Broker.Size)
+					"NewSize", c.Spec.Broker.Replicas)
 			}
 		}
 	}
@@ -112,5 +112,5 @@ func (r *PulsarClusterReconciler) isBrokerRunning(c *v1alpha1.Pulsar) bool {
 		Name:      dm.Name,
 		Namespace: dm.Namespace,
 	}, dmCur)
-	return err == nil && dmCur.Status.ReadyReplicas == c.Spec.Broker.Size
+	return err == nil && dmCur.Status.ReadyReplicas == c.Spec.Broker.Replicas
 }

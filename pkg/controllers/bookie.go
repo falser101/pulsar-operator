@@ -70,13 +70,13 @@ func (r *PulsarClusterReconciler) reconcileBookieStatefulSet(c *v1alpha1.Pulsar)
 	} else if err != nil {
 		return err
 	} else {
-		if c.Spec.Bookie.Size != *ssCur.Spec.Replicas {
+		if c.Spec.Bookie.Replicas != *ssCur.Spec.Replicas {
 			old := *ssCur.Spec.Replicas
-			ssCur.Spec.Replicas = &c.Spec.Bookie.Size
+			ssCur.Spec.Replicas = &c.Spec.Bookie.Replicas
 			if err = r.client.Update(context.TODO(), ssCur); err == nil {
 				r.log.Info("Scale pulsar bookie statefulSet success",
 					"OldSize", old,
-					"NewSize", c.Spec.Bookie.Size)
+					"NewSize", c.Spec.Bookie.Replicas)
 			}
 		}
 	}
@@ -118,7 +118,7 @@ func (r *PulsarClusterReconciler) isBookieRunning(c *v1alpha1.Pulsar) bool {
 		Namespace: c.Namespace,
 	}, ss)
 	if err == nil {
-		return ss.Status.ReadyReplicas == c.Spec.Bookie.Size
+		return ss.Status.ReadyReplicas == c.Spec.Bookie.Replicas
 	}
 	return false
 }
