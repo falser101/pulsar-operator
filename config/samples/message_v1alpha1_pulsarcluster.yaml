@@ -1,0 +1,12 @@
+apiVersion: message.apache.com/v1alpha1
+kind: PulsarCluster
+metadata:
+  labels:
+    app.kubernetes.io/name: pulsarcluster
+    app.kubernetes.io/instance: pulsarcluster-sample
+    app.kubernetes.io/part-of: test
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: test
+  name: pulsarcluster-sample
+spec:
+  # TODO(user): Add fields here
