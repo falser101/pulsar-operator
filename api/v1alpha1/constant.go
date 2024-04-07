@@ -84,7 +84,7 @@ const (
 	DefaultPrometheusContainerVersion = "v2.17.2"
 
 	// DefaultContainerPolicy is the default container pull policy used
-	DefaultContainerPolicy = "Always"
+	DefaultContainerPolicy = "IfNotPresent"
 
 	DefaultMonitorGrafanaContainerRepository = "tlq-cn-grafana"
 
