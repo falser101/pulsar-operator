@@ -18,11 +18,16 @@ package controller
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/internal/component/metadata"
 	"github.com/go-logr/logr"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -37,8 +42,9 @@ type reconcileFunc func(cluster *v1alpha1.PulsarCluster) error
 // PulsarClusterReconciler reconciles a PulsarCluster object
 type PulsarClusterReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
-	log    logr.Logger
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
+	log      logr.Logger
 }
 
 //+kubebuilder:rbac:groups=message.apache.com,resources=pulsarclusters,verbs=get;list;watch;create;update;patch;delete
@@ -109,6 +115,17 @@ func (r *PulsarClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 func (r *PulsarClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.PulsarCluster{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&batchv1.Job{}).
+		Owns(&appsv1.StatefulSet{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Service{}).
+		Owns(&corev1.ServiceAccount{}).
+		Owns(&corev1.Secret{}).
+		Owns(&corev1.PersistentVolumeClaim{}).
+		Owns(&corev1.Pod{}).
+		Owns(&corev1.PersistentVolume{}).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 2}).
 		Complete(r)
 }
 

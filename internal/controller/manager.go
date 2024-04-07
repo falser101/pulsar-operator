@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/internal/component/manager"
 	appsv1 "k8s.io/api/apps/v1"
@@ -13,7 +14,7 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileManager(c *v1alpha1.PulsarCluster) (err error) {
-	if c.Spec.Manager.Enabled == false {
+	if !c.Spec.Manager.Enabled {
 		return
 	}
 	for _, fun := range []reconcileFunc{

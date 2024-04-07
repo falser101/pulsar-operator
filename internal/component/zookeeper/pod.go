@@ -7,23 +7,23 @@ import (
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/api/policy/v1beta1"
+	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func MakePodDisruptionBudget(c *v1alpha1.PulsarCluster) *v1beta1.PodDisruptionBudget {
+func MakePodDisruptionBudget(c *v1alpha1.PulsarCluster) *policyv1.PodDisruptionBudget {
 	count := intstr.FromInt(1)
-	return &v1beta1.PodDisruptionBudget{
+	return &policyv1.PodDisruptionBudget{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "PodDisruptionBudget",
-			APIVersion: "policy/v1beta1",
+			APIVersion: "policy/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      MakePodDisruptionBudgetName(c),
 			Namespace: c.Namespace,
 		},
-		Spec: v1beta1.PodDisruptionBudgetSpec{
+		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable: &count,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),

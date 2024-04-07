@@ -2,11 +2,12 @@ package controller
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/internal/component/zookeeper"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/api/policy/v1beta1"
+	policyV1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -17,7 +18,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeper(c *v1alpha1.PulsarCluster) 
 		r.reconcileZookeeperConfigMap,
 		r.reconcileZookeeperStatefulSet,
 		r.reconcileZookeeperService,
-		//r.reconcileZookeeperPodDisruptionBudget,
+		r.reconcileZookeeperPodDisruptionBudget,
 	} {
 		if err := fun(c); err != nil {
 			r.log.Error(err, "Reconciling Pulsar Zookeeper Error", c)
@@ -114,7 +115,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperService(c *v1alpha1.PulsarCl
 func (r *PulsarClusterReconciler) reconcileZookeeperPodDisruptionBudget(c *v1alpha1.PulsarCluster) (err error) {
 	pdb := zookeeper.MakePodDisruptionBudget(c)
 
-	pdbCur := &v1beta1.PodDisruptionBudget{}
+	pdbCur := &policyV1.PodDisruptionBudget{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name:      pdb.Name,
 		Namespace: pdb.Namespace,
