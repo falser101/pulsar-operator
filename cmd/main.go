@@ -40,8 +40,9 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme        = runtime.NewScheme()
+	setupLog      = ctrl.Log.WithName("setup")
+	controllerLog = ctrl.Log.WithName("pulsar cluster log")
 )
 
 func init() {
@@ -121,12 +122,8 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
-	if err = (&controller.PulsarClusterReconciler{
-		Client:   mgr.GetClient(),
-		Scheme:   mgr.GetScheme(),
-		Recorder: mgr.GetEventRecorderFor("pulsarCluster-controller"),
-	}).SetupWithManager(mgr); err != nil {
+	pulsarClusterReconciler := controller.NewPulsarClusterReconciler(mgr.GetClient(), mgr.GetScheme(), mgr.GetEventRecorderFor("pulsarCluster-controller"), controllerLog)
+	if err = pulsarClusterReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PulsarCluster")
 		os.Exit(1)
 	}

@@ -49,7 +49,7 @@ func makePodTemplate(c *v1alpha1.PulsarCluster) corev1.PodTemplateSpec {
 			Labels:       v1alpha1.MakeComponentLabels(c, ComponentName),
 		},
 		Spec: corev1.PodSpec{
-			InitContainers: []corev1.Container{makeInitContainer(c)},
+			InitContainers: []corev1.Container{zookeeper.MakeWaitZookeeperReadyContainer(c), makeInitContainer(c)},
 			Containers:     []corev1.Container{makeContainer(c)},
 			RestartPolicy:  corev1.RestartPolicyNever,
 		},
@@ -62,7 +62,16 @@ func makeInitContainer(c *v1alpha1.PulsarCluster) corev1.Container {
 		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
 		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
 		Command:         makeContainerCommand(),
-		Args:            makeContainerCommandArgs(c),
+		Args:            makeInitContainerCommandArgs(c),
+	}
+}
+
+func makeInitContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
+	return []string{
+		`bin/apply-config-from-env.py conf/bookkeeper.conf;
+		until bin/bookkeeper shell whatisinstanceid; do
+			sleep 3;
+		done;`,
 	}
 }
 
