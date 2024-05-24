@@ -2,9 +2,10 @@ package broker
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,7 +29,7 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 }
 
 func MakeServiceName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-broker-service", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.BrokerComponent)
 }
 
 func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
@@ -42,4 +43,8 @@ func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
 			Port: v1alpha1.PulsarBrokerPulsarServerPort,
 		},
 	}
+}
+
+func hostname(c *v1alpha1.PulsarCluster) string {
+	return fmt.Sprintf("${HOSTNAME}.%s.%s.svc.cluster.local", MakeServiceName(c), c.Namespace)
 }

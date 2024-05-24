@@ -30,7 +30,7 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 }
 
 func MakeServiceName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-proxy-service", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ProxyComponent)
 }
 
 func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {

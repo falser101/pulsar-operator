@@ -1,4 +1,4 @@
-package proxy
+package broker
 
 import (
 	"fmt"
@@ -13,28 +13,28 @@ import (
 func MakeStatefulSet(c *v1alpha1.PulsarCluster) *appsv1.StatefulSet {
 	return &appsv1.StatefulSet{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "StatefulSet",
+			Kind:       "Deployment",
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      MakeStatefulSetName(c),
+			Name:      makeStatefulSetName(c),
 			Namespace: c.Namespace,
-			Labels:    v1alpha1.MakeComponentLabels(c, v1alpha1.ProxyComponent),
+			Labels:    v1alpha1.MakeComponentLabels(c, v1alpha1.BrokerComponent),
 		},
 		Spec: makeStatefulSetSpec(c),
 	}
 }
 
-func MakeStatefulSetName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-proxy-statefulset", c.GetName())
+func makeStatefulSetName(c *v1alpha1.PulsarCluster) string {
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.BrokerComponent)
 }
 
 func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 	return appsv1.StatefulSetSpec{
 		Selector: &metav1.LabelSelector{
-			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ProxyComponent),
+			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.BrokerComponent),
 		},
-		Replicas: &c.Spec.Proxy.Replicas,
+		Replicas: &c.Spec.Broker.Replicas,
 		Template: makeStatefulSetPodTemplate(c),
 	}
 }
@@ -42,9 +42,9 @@ func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 func makeStatefulSetPodTemplate(c *v1alpha1.PulsarCluster) v1.PodTemplateSpec {
 	return v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: c.GetName(),
-			Labels:       v1alpha1.MakeComponentLabels(c, v1alpha1.ProxyComponent),
-			Annotations:  DeploymentAnnotations,
+			GenerateName: c.Name,
+			Labels:       v1alpha1.MakeComponentLabels(c, v1alpha1.BrokerComponent),
+			Annotations:  StatefulSetAnnotations,
 		},
 		Spec: makePodSpec(c),
 	}

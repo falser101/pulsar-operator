@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
@@ -108,8 +109,7 @@ func (r *PulsarClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		r.reconcileAutoRecovery,
 		r.reconcileBroker,
 		r.reconcileProxy,
-		r.reconcileManager,
-		r.reconcileMonitor,
+		r.reconcileToolset,
 		r.reconcilePulsarCluster,
 	} {
 		if err := fun(pulsar); err != nil {
@@ -163,6 +163,9 @@ func (r *PulsarClusterReconciler) reconcileInitPulsarClusterMetaData(c *v1alpha1
 		Namespace: job.Namespace,
 	}, jobCur)
 	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, job, r.Scheme); err != nil {
+			return
+		}
 		if err = r.Create(context.TODO(), job); err == nil {
 			r.log.Info("Start init pulsar cluster metaData job",
 				"Job.Namespace", job.Namespace,

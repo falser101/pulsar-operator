@@ -2,13 +2,23 @@ package bookie
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
-	"github.com/falser101/pulsar-operator/internal/component/zookeeper"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func MakeConfigMap(c *v1alpha1.PulsarCluster) *v1.ConfigMap {
+	var data = map[string]string{
+		"autoRecoveryDaemonEnabled":        "false",
+		"journalMaxBackups":                "0",
+		"journalDirectories":               "/pulsar/data/bookkeeper/journal",
+		"PULSAR_PREFIX_journalDirectories": "/pulsar/data/bookkeeper/journal",
+		"ledgerDirectories":                "/pulsar/data/bookkeeper/ledgers",
+	}
+	for key, value := range c.Spec.Bookie.ConfigData {
+		data[key] = value
+	}
 	return &v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -18,24 +28,10 @@ func MakeConfigMap(c *v1alpha1.PulsarCluster) *v1.ConfigMap {
 			Name:      MakeConfigMapName(c),
 			Namespace: c.Namespace,
 		},
-		Data: map[string]string{
-			"BOOKIE_MEM":                MemData,
-			"PULSAR_GC":                 PulsarGC,
-			"PULSAR_MEM":                PulsarMem,
-			"autoRecoveryDaemonEnabled": "false",
-			"httpServerEnabled":         "true",
-			"httpServerPort":            "8000",
-			"journalDirectories":        "/pulsar/data/bookkeeper/journal",
-			"journalMaxBackups":         "0",
-			"ledgerDirectories":         "/pulsar/data/bookkeeper/ledgers",
-			"zkServers":                 zookeeper.MakeServiceName(c) + ":2181",
-			"zkLedgersRootPath":         "/ledgers",
-			"statsProviderClass":        StatsProviderClass,
-			"useHostNameAsBookieID":     "true",
-		},
+		Data: data,
 	}
 }
 
 func MakeConfigMapName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-bookie-configmap", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.BookieComponent)
 }

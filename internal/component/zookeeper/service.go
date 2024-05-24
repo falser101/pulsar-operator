@@ -2,9 +2,10 @@ package zookeeper
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -21,26 +22,43 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 			Annotations: ServiceAnnotations,
 		},
 		Spec: v1.ServiceSpec{
-			Ports:     makeServicePorts(c),
-			ClusterIP: v1.ClusterIPNone,
-			Selector:  v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
+			Ports:                    makeServicePorts(c),
+			ClusterIP:                v1.ClusterIPNone,
+			PublishNotReadyAddresses: true,
+			Selector:                 v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 		},
 	}
 }
 
 func MakeServiceName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-zookeeper-service", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }
 
 func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
 	return []v1.ServicePort{
 		{
-			Name: "server",
-			Port: v1alpha1.ZookeeperContainerServerDefaultPort,
+			Name: "http",
+			Port: c.Spec.Zookeeper.Ports.Http,
+		},
+		{
+			Name: "follower",
+			Port: c.Spec.Zookeeper.Ports.Follower,
 		},
 		{
 			Name: "leader-election",
-			Port: v1alpha1.ZookeeperContainerLeaderElectionPort,
+			Port: c.Spec.Zookeeper.Ports.LeaderElection,
+		},
+		{
+			Name: "client",
+			Port: c.Spec.Zookeeper.Ports.Client,
 		},
 	}
+}
+
+func Connect(c *v1alpha1.PulsarCluster) string {
+	return fmt.Sprintf("%s:%s", MakeServiceName(c), c.Spec.Zookeeper.Ports.Client)
+}
+
+func Hostname(c *v1alpha1.PulsarCluster) string {
+	return fmt.Sprintf("${HOSTNAME}.%s.%s.svc.cluster.local", MakeServiceName(c), c.Namespace)
 }

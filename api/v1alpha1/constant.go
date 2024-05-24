@@ -28,8 +28,6 @@ const (
 
 	// ProxyClusterDefaultNodeNum number default num is 3
 	ProxyClusterDefaultNodeNum = 3
-
-	ManagerDefaultNodeNum = 1
 )
 
 const (
@@ -46,22 +44,9 @@ const (
 	ProxyComponent = "proxy"
 
 	// AutoRecoveryComponent autoRecovery
-	AutoRecoveryComponent = "autoRecovery"
+	AutoRecoveryComponent = "autorecovery"
 
-	// ManagerComponent component
-	ManagerComponent = "manager"
-
-	// MonitorComponent component
-	MonitorComponent = "monitor"
-)
-
-// monitor child component
-const (
-	// MonitorPrometheusComponent prometheus component
-	MonitorPrometheusComponent = "monitor-prometheus"
-
-	// MonitorGrafanaComponent grafana component
-	MonitorGrafanaComponent = "monitor-grafana"
+	ToolsetComponent = "toolset"
 )
 
 const (
@@ -71,24 +56,8 @@ const (
 	// DefaultAllPulsarContainerVersion is the default tag used for components
 	DefaultAllPulsarContainerVersion = "latest"
 
-	// DefaultPulsarManagerContainerRepository is default docker image name of pulsar manager
-	DefaultPulsarManagerContainerRepository = "tlq-cn-console"
-
-	// DefaultPulsarManagerContainerVersion is
-	DefaultPulsarManagerContainerVersion = "v10.0.0.1"
-
-	// DefaultPrometheusContainerRepository prometheus
-	DefaultPrometheusContainerRepository = "prom/prometheus"
-
-	// DefaultPrometheusContainerVersion version
-	DefaultPrometheusContainerVersion = "v2.17.2"
-
 	// DefaultContainerPolicy is the default container pull policy used
 	DefaultContainerPolicy = "IfNotPresent"
-
-	DefaultMonitorGrafanaContainerRepository = "tlq-cn-grafana"
-
-	DefaultMonitorGrafanaContainerTag = "v10.0.0.1"
 )
 
 // Labels
@@ -113,7 +82,7 @@ func MakeComponentLabels(c *PulsarCluster, component string) map[string]string {
 func MakeAllLabels(c *PulsarCluster, component string, childComponent string) map[string]string {
 	labels := make(map[string]string)
 	labels[LabelService] = Service
-	labels[LabelCluster] = c.GetName()
+	labels[LabelCluster] = c.Name
 	labels[LabelComponent] = component
 	if childComponent != "" {
 		labels[LabelChildComponent] = childComponent
@@ -143,37 +112,17 @@ const (
 
 	// PulsarBookieClientPort Bookie client port
 	PulsarBookieClientPort = 8000
-
-	// PulsarGrafanaServerPort Grafana server port
-	PulsarGrafanaServerPort = 3000
-
-	// PulsarPrometheusServerPort Prometheus server port
-	PulsarPrometheusServerPort = 9090
-
-	// PulsarManagerBackendPort server port
-	PulsarManagerBackendPort = 7750
-
-	// PulsarManagerBackNodePort nodePort
-	PulsarManagerBackNodePort = 30750
-
-	// PulsarManagerFrontendNodePort nodePort
-	PulsarManagerFrontendNodePort = 30527
-
-	// PulsarManagerFrontendPort frontend port
-	PulsarManagerFrontendPort = 9527
 )
 
 // Storage default capacity
 const (
 	// JournalStorageDefaultCapacity journal storage default capacity
-	JournalStorageDefaultCapacity = 1
+	JournalStorageDefaultCapacity = "1Gi"
 
 	// LedgersStorageDefaultCapacity ledgers storage default capacity
-	LedgersStorageDefaultCapacity = 10
+	LedgersStorageDefaultCapacity = "10Gi"
 
-	PrometheusStorageDefaultCapacity       = 10
-	GrafanaStorageDefaultCapacity          = 10
-	ZookeeperClusterDefaultStorageCapacity = 10
+	ZookeeperClusterDefaultStorageCapacity = "10Gi"
 )
 
 const (

@@ -10,8 +10,8 @@ type AutoRecovery struct {
 	// the bookie cluster.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Size (DEPRECATED) is the expected size of the bookie cluster.
-	Size int32 `json:"size,omitempty"`
+	// Replicas is the expected replicas of the bookie cluster.
+	Replicas int32 `json:"replicas,omitempty"`
 
 	// Pod defines the policy to create pod for the bookie cluster.
 	//

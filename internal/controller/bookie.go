@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/internal/component/bookie"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -13,6 +15,7 @@ import (
 
 func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.PulsarCluster) error {
 	for _, fun := range []reconcileFunc{
+		r.reconcileBookieInitJob,
 		r.reconcileBookieConfigMap,
 		r.reconcileBookieStatefulSet,
 		r.reconcileBookieService,
@@ -23,6 +26,27 @@ func (r *PulsarClusterReconciler) reconcileBookie(c *v1alpha1.PulsarCluster) err
 		}
 	}
 	return nil
+}
+
+func (r *PulsarClusterReconciler) reconcileBookieInitJob(c *v1alpha1.PulsarCluster) (err error) {
+	jobCreate := bookie.MakeBookieClusterInitJob(c)
+	jobCur := &batchv1.Job{}
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Name:      jobCreate.Name,
+		Namespace: jobCreate.Namespace,
+	}, jobCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, jobCreate, r.Scheme); err != nil {
+			return err
+		}
+
+		if err = r.Create(context.TODO(), jobCreate); err == nil {
+			r.log.Info("Create pulsar bookie init job success",
+				"Job.Namespace", c.Namespace,
+				"Job.Name", jobCreate.GetName())
+		}
+	}
+	return
 }
 
 func (r *PulsarClusterReconciler) reconcileBookieConfigMap(c *v1alpha1.PulsarCluster) (err error) {

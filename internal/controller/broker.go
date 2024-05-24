@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/internal/component/broker"
 	appsv1 "k8s.io/api/apps/v1"
@@ -14,7 +15,7 @@ import (
 func (r *PulsarClusterReconciler) reconcileBroker(c *v1alpha1.PulsarCluster) error {
 	for _, fun := range []reconcileFunc{
 		r.reconcileBrokerConfigMap,
-		r.reconcileBrokerDeployment,
+		r.reconcileBrokerStatefulSet,
 		r.reconcileBrokerService,
 		r.reconcileAuthentication,
 	} {
@@ -48,10 +49,10 @@ func (r *PulsarClusterReconciler) reconcileBrokerConfigMap(c *v1alpha1.PulsarClu
 	return
 }
 
-func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.PulsarCluster) (err error) {
-	dmCreate := broker.MakeDeployment(c)
+func (r *PulsarClusterReconciler) reconcileBrokerStatefulSet(c *v1alpha1.PulsarCluster) (err error) {
+	dmCreate := broker.MakeStatefulSet(c)
 
-	dmCur := &appsv1.Deployment{}
+	dmCur := &appsv1.StatefulSet{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name:      dmCreate.Name,
 		Namespace: dmCreate.Namespace,
@@ -62,9 +63,9 @@ func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.PulsarCl
 		}
 
 		if err = r.Create(context.TODO(), dmCreate); err == nil {
-			r.log.Info("Create pulsar broker deployment success",
-				"Deployment.Namespace", c.Namespace,
-				"Deployment.Name", dmCreate.GetName())
+			r.log.Info("Create pulsar broker statefulset success",
+				"StatefulSet.Namespace", c.Namespace,
+				"StatefulSet.Name", dmCreate.GetName())
 		}
 	} else if err != nil {
 		return err
@@ -73,7 +74,7 @@ func (r *PulsarClusterReconciler) reconcileBrokerDeployment(c *v1alpha1.PulsarCl
 			old := *dmCur.Spec.Replicas
 			dmCur.Spec.Replicas = &c.Spec.Broker.Replicas
 			if err = r.Update(context.TODO(), dmCur); err == nil {
-				r.log.Info("Scale pulsar broker deployment success",
+				r.log.Info("Scale pulsar broker statefulSet success",
 					"OldSize", old,
 					"NewSize", c.Spec.Broker.Replicas)
 			}
@@ -105,12 +106,12 @@ func (r *PulsarClusterReconciler) reconcileBrokerService(c *v1alpha1.PulsarClust
 }
 
 func (r *PulsarClusterReconciler) isBrokerRunning(c *v1alpha1.PulsarCluster) bool {
-	dm := broker.MakeDeployment(c)
+	ss := broker.MakeStatefulSet(c)
 
-	dmCur := &appsv1.Deployment{}
+	ssCur := &appsv1.StatefulSet{}
 	err := r.Get(context.TODO(), types.NamespacedName{
-		Name:      dm.Name,
-		Namespace: dm.Namespace,
-	}, dmCur)
-	return err == nil && dmCur.Status.ReadyReplicas == c.Spec.Broker.Replicas
+		Name:      ss.Name,
+		Namespace: ss.Namespace,
+	}, ssCur)
+	return err == nil && ssCur.Status.ReadyReplicas == c.Spec.Broker.Replicas
 }

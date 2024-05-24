@@ -2,13 +2,22 @@ package zookeeper
 
 import (
 	"fmt"
+
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func MakeConfigMap(c *v1alpha1.PulsarCluster) *v1.ConfigMap {
+	var data = map[string]string{
+		"dataDir":                         "/pulsar/data/zookeeper",
+		"PULSAR_PREFIX_serverCnxnFactory": "org.apache.zookeeper.server.NIOServerCnxnFactory",
+		"serverCnxnFactory":               "org.apache.zookeeper.server.NIOServerCnxnFactory",
+	}
+	for key, val := range c.Spec.Zookeeper.ConfigData {
+		data[key] = val
+	}
 	return &v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -18,13 +27,10 @@ func MakeConfigMap(c *v1alpha1.PulsarCluster) *v1.ConfigMap {
 			Name:      MakeConfigMapName(c),
 			Namespace: c.Namespace,
 		},
-		Data: map[string]string{
-			"PULSAR_MEM": PulsarMemData,
-			"PULSAR_GC":  PulsarGCData,
-		},
+		Data: data,
 	}
 }
 
 func MakeConfigMapName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-zookeeper-configmap", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }

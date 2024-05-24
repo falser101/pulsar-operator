@@ -77,46 +77,50 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 }
 
 func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
-	env := make([]v1.EnvVar, 0)
-	env = append(env, v1.EnvVar{
-		Name: "POD_NAME",
-		ValueFrom: &v1.EnvVarSource{
-			FieldRef: &v1.ObjectFieldSelector{
-				FieldPath:  "metadata.name",
-				APIVersion: "v1",
+	return []v1.EnvVar{
+		{
+			Name: "POD_NAME",
+			ValueFrom: &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					FieldPath:  "metadata.name",
+					APIVersion: "v1",
+				},
 			},
-		}})
-	env = append(env, v1.EnvVar{
-		Name: "POD_NAMESPACE",
-		ValueFrom: &v1.EnvVarSource{
-			FieldRef: &v1.ObjectFieldSelector{
-				FieldPath:  "metadata.namespace",
-				APIVersion: "v1",
+		},
+		{
+			Name: "POD_NAMESPACE",
+			ValueFrom: &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					FieldPath:  "metadata.namespace",
+					APIVersion: "v1",
+				},
 			},
-		}})
-	env = append(env, v1.EnvVar{
-		Name:  "VOLUME_NAME",
-		Value: c.Name + "-bookie-journal",
-	})
-	env = append(env, v1.EnvVar{
-		Name:  "BOOKIE_PORT",
-		Value: "3181",
-	})
-	env = append(env, v1.EnvVar{
-		Name:  "BOOKIE_RACK_AWARE_ENABLED",
-		Value: "true",
-	})
-	return env
+		},
+		{
+			Name:  "VOLUME_NAME",
+			Value: c.Name + "-bookie-journal",
+		},
+		{
+			Name:  "BOOKIE_PORT",
+			Value: "3181",
+		},
+		{
+			Name:  "BOOKIE_RACK_AWARE_ENABLED",
+			Value: "true",
+		},
+	}
 }
 
 func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
-	froms := make([]v1.EnvFromSource, 0)
-
-	var configRef v1.ConfigMapEnvSource
-	configRef.Name = MakeConfigMapName(c)
-
-	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
-	return froms
+	return []v1.EnvFromSource{
+		{
+			ConfigMapRef: &v1.ConfigMapEnvSource{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: MakeConfigMapName(c),
+				},
+			},
+		},
+	}
 }
 
 func makeInitContainer(c *v1alpha1.PulsarCluster) v1.Container {
@@ -139,22 +143,26 @@ func makeInitContainerCommand() []string {
 
 func makeInitContainerCommandArgs() []string {
 	return []string{
-		`set -e; bin/apply-config-from-env.py conf/bookkeeper.conf;until bin/bookkeeper shell whatisinstanceid; do
-			sleep 3;
-		done;`,
+		"set -e;",
+		"bin/apply-config-from-env.py conf/bookkeeper.conf;",
+		"until bin/bookkeeper shell whatisinstanceid;",
+		"do sleep 3;",
+		"done;",
 	}
 }
 
 func makeInitContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
-	froms := make([]v1.EnvFromSource, 0)
-
-	var configRef v1.ConfigMapEnvSource
-	configRef.Name = MakeConfigMapName(c)
-
-	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
-	return froms
+	return []v1.EnvFromSource{
+		{
+			ConfigMapRef: &v1.ConfigMapEnvSource{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: MakeConfigMapName(c),
+				},
+			},
+		},
+	}
 }
 
 func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
-	return c.Spec.Bookie.StorageClassName == ""
+	return c.Spec.Bookie.JournalStorageClassName == "" && c.Spec.Bookie.LedgersStorageClassName == ""
 }

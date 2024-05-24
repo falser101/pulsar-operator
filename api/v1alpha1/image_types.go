@@ -89,44 +89,17 @@ func (c *ContainerImage) SetDefault(cluster *PulsarCluster, component string) bo
 			cluster.Spec.Proxy.Image.PullPolicy = DefaultContainerPolicy
 			changed = true
 		}
-
-	case ManagerComponent:
-		if cluster.Spec.Manager.Image.Repository == "" {
-			cluster.Spec.Manager.Image.Repository = DefaultPulsarManagerContainerRepository
+	case ToolsetComponent:
+		if cluster.Spec.Toolset.Image.Repository == "" {
+			cluster.Spec.Toolset.Image.Repository = DefaultAllPulsarContainerRepository
 			changed = true
 		}
-		if cluster.Spec.Manager.Image.Tag == "" {
-			cluster.Spec.Manager.Image.Tag = DefaultPulsarManagerContainerVersion
+		if cluster.Spec.Toolset.Image.Tag == "" {
+			cluster.Spec.Toolset.Image.Tag = DefaultAllPulsarContainerVersion
 			changed = true
 		}
-		if cluster.Spec.Manager.Image.PullPolicy == "" {
-			cluster.Spec.Manager.Image.PullPolicy = corev1.PullIfNotPresent
-			changed = true
-		}
-	case MonitorPrometheusComponent:
-		if cluster.Spec.Monitor.Prometheus.Image.Repository == "" {
-			cluster.Spec.Monitor.Prometheus.Image.Repository = DefaultPrometheusContainerRepository
-			changed = true
-		}
-		if cluster.Spec.Monitor.Prometheus.Image.Tag == "" {
-			cluster.Spec.Monitor.Prometheus.Image.Tag = DefaultPrometheusContainerVersion
-			changed = true
-		}
-		if cluster.Spec.Monitor.Prometheus.Image.PullPolicy == "" {
-			cluster.Spec.Monitor.Prometheus.Image.PullPolicy = corev1.PullIfNotPresent
-			changed = true
-		}
-	case MonitorGrafanaComponent:
-		if cluster.Spec.Monitor.Grafana.Image.Repository == "" {
-			cluster.Spec.Monitor.Grafana.Image.Repository = DefaultMonitorGrafanaContainerRepository
-			changed = true
-		}
-		if cluster.Spec.Monitor.Grafana.Image.Tag == "" {
-			cluster.Spec.Monitor.Grafana.Image.Tag = DefaultMonitorGrafanaContainerTag
-			changed = true
-		}
-		if cluster.Spec.Monitor.Grafana.Image.PullPolicy == "" {
-			cluster.Spec.Monitor.Grafana.Image.PullPolicy = corev1.PullIfNotPresent
+		if cluster.Spec.Toolset.Image.PullPolicy == "" {
+			cluster.Spec.Toolset.Image.PullPolicy = DefaultContainerPolicy
 			changed = true
 		}
 	}

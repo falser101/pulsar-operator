@@ -169,7 +169,7 @@ Loggers:
 #             ref: filter.js
 `,
 	}
-	if c.Spec.Authentication.Enabled {
+	if c.Spec.Auth.AuthenticationEnabled {
 		configData["authenticationEnabled"] = "true"
 		configData["authenticationProviders"] = "org.apache.pulsar.broker.authentication.AuthenticationProviderToken"
 		configData["brokerClientAuthenticationParameters"] = "file:///pulsar/tokens/proxy/token"
@@ -191,5 +191,5 @@ Loggers:
 }
 
 func MakeConfigMapName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-proxy-configmap", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ProxyComponent)
 }

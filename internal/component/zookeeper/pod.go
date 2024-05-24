@@ -33,13 +33,14 @@ func MakePodDisruptionBudget(c *v1alpha1.PulsarCluster) *policyv1.PodDisruptionB
 }
 
 func MakePodDisruptionBudgetName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-zookeeper-poddisruptionbudget", c.GetName())
+	return fmt.Sprintf("%s-zookeeper-poddisruptionbudget", c.Name)
 }
 
 func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	var p = v1.PodSpec{
-		Affinity:   c.Spec.Zookeeper.Pod.Affinity,
-		Containers: []v1.Container{makeContainer(c)},
+		Affinity:           c.Spec.Zookeeper.Pod.Affinity,
+		ServiceAccountName: makeSerserviceAccountName(c),
+		Containers:         []v1.Container{makeContainer(c)},
 	}
 	if isUseEmptyDirVolume(c) {
 		p.Volumes = makeEmptyDirVolume(c)
@@ -72,7 +73,10 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 		},
 
 		VolumeMounts: []v1.VolumeMount{
-			{Name: makeZookeeperDateVolumeName(c), MountPath: ContainerDataPath},
+			{
+				Name:      makeZookeeperDateVolumeName(c),
+				MountPath: ContainerDataPath,
+			},
 		},
 	}
 }
@@ -86,10 +90,10 @@ func makeContainerCommand() []string {
 
 func makeContainerCommandArgs() []string {
 	return []string{
-		"bin/apply-config-from-env.py conf/zookeeper.conf && " +
-			"bin/apply-config-from-env.py conf/pulsar_env.sh && " +
-			"bin/generate-zookeeper-config.sh conf/zookeeper.conf && " +
-			"bin/pulsar zookeeper",
+		`bin/apply-config-from-env.py conf/zookeeper.conf;
+		bin/apply-config-from-env.py conf/pulsar_env.sh;
+		bin/generate-zookeeper-config.sh conf/zookeeper.conf;
+		bin/pulsar zookeeper;`,
 	}
 }
 
@@ -114,19 +118,24 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 }
 
 func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
-	env := make([]v1.EnvVar, 0)
-	env = append(env, v1.EnvVar{Name: ContainerZookeeperServerList, Value: strings.Join(makeStatefulSetPodNameList(c), ",")})
-	return env
+	return []v1.EnvVar{
+		{
+			Name:  ContainerZookeeperServerList,
+			Value: strings.Join(makeStatefulSetPodNameList(c), ","),
+		},
+	}
 }
 
 func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
-	froms := make([]v1.EnvFromSource, 0)
-
-	var configRef v1.ConfigMapEnvSource
-	configRef.Name = MakeConfigMapName(c)
-
-	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
-	return froms
+	return []v1.EnvFromSource{
+		{
+			ConfigMapRef: &v1.ConfigMapEnvSource{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: MakeConfigMapName(c),
+				},
+			},
+		},
+	}
 }
 
 func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
@@ -140,20 +149,13 @@ func MakeWaitZookeeperReadyContainer(c *v1alpha1.PulsarCluster) v1.Container {
 		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
 		Command:         makeContainerCommand(),
 		Args:            makeWaitZookeeperReadyContainerCommandArgs(c),
-		EnvFrom:         makeWaitZookeeperReadyContainerEnvFrom(c),
 	}
 }
 
 func makeWaitZookeeperReadyContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
 	return []string{
-		fmt.Sprintf(`until bin/pulsar zookeeper-shell -server %s-zookeeper-service get /admin/clusters/%s; do
+		fmt.Sprintf(`until nslookup %s.%s.%s.svc.cluster.local; do
 		sleep 3;
-		done;`, c.GetName(), c.GetName()),
-	}
-}
-
-func makeWaitZookeeperReadyContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
-	return []v1.EnvFromSource{
-		{ConfigMapRef: &v1.ConfigMapEnvSource{LocalObjectReference: v1.LocalObjectReference{Name: MakeConfigMapName(c)}}},
+	  done;`, fmt.Sprintf("%s-%d", MakeStatefulSetName(c), c.Spec.Zookeeper.Replicas-1), MakeServiceName(c), c.Namespace),
 	}
 }

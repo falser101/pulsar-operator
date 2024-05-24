@@ -16,6 +16,7 @@ import (
 func (r *PulsarClusterReconciler) reconcileZookeeper(c *v1alpha1.PulsarCluster) error {
 	for _, fun := range []reconcileFunc{
 		r.reconcileZookeeperConfigMap,
+		r.reconcileZookeeperServiceAccount,
 		r.reconcileZookeeperStatefulSet,
 		r.reconcileZookeeperService,
 		r.reconcileZookeeperPodDisruptionBudget,
@@ -45,6 +46,27 @@ func (r *PulsarClusterReconciler) reconcileZookeeperConfigMap(c *v1alpha1.Pulsar
 			r.log.Info("Create pulsar zookeeper config map success",
 				"ConfigMap.Namespace", c.Namespace,
 				"ConfigMap.Name", cmCreate.GetName())
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileZookeeperServiceAccount(c *v1alpha1.PulsarCluster) (err error) {
+	saCreate := zookeeper.MakeServiceAccount(c)
+	saCur := &v1.ServiceAccount{}
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Name:      saCreate.Name,
+		Namespace: saCreate.Namespace,
+	}, saCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, saCreate, r.Scheme); err != nil {
+			return err
+		}
+
+		if err = r.Create(context.TODO(), saCreate); err == nil {
+			r.log.Info("Create pulsar zookeeper service account success",
+				"ServiceAccount.Namespace", c.Namespace,
+				"ServiceAccount.Name", saCreate.GetName())
 		}
 	}
 	return

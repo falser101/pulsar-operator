@@ -25,17 +25,24 @@ func MakeConfigMap(c *v1alpha1.PulsarCluster) *v1.ConfigMap {
 
 func makeConfigMapData(c *v1alpha1.PulsarCluster) (data map[string]string) {
 	data = map[string]string{
-		"PULSAR_MEM":                       PulsarMemData,
-		"zookeeperServers":                 zookeeper.MakeServiceName(c),
-		"configurationStoreServers":        zookeeper.MakeServiceName(c),
-		"clusterName":                      c.GetName(),
-		"managedLedgerDefaultEnsembleSize": ManagedLedgerDefaultEnsembleSize,
-		"managedLedgerDefaultWriteQuorum":  ManagedLedgerDefaultWriteQuorum,
-		"managedLedgerDefaultAckQuorum":    ManagedLedgerDefaultAckQuorum,
-		"functionsWorkerEnabled":           FunctionsWorkerEnabled,
-		"PF_pulsarFunctionsCluster":        c.GetName(),
+		// metadata setting
+		"zookeeperServers":          zookeeper.Connect(c),
+		"configurationStoreServers": zookeeper.Connect(c),
+		// Broker settings
+		"clusterName":                         c.Name,
+		"exposeTopicLevelMetricsInPrometheus": "true",
+		"numHttpServerThreads":                "8",
+		"zooKeeperSessionTimeoutMillis":       "30000",
+		"statusFilePath":                      "/pulsar/logs/status",
+		"functionsWorkerEnabled":              FunctionsWorkerEnabled,
+
+		"webServicePort":    c.Spec.Broker.Ports.Http,
+		"brokerServicePort": c.Spec.Broker.Ports.Pulsar,
 	}
-	if c.Spec.Authentication.Enabled {
+	if c.Spec.Auth.AuthorizationEnabled {
+		data["authorizationEnabled"] = "true"
+	}
+	if c.Spec.Auth.AuthenticationEnabled {
 		// broker.conf
 		data["authenticationEnabled"] = "true"
 		data["authenticationProviders"] = "org.apache.pulsar.broker.authentication.AuthenticationProviderToken"
@@ -46,10 +53,12 @@ func makeConfigMapData(c *v1alpha1.PulsarCluster) (data map[string]string) {
 		data["authParams"] = "file:///pulsar/tokens/broker/token"
 		data["authPlugin"] = "org.apache.pulsar.impl.auth.AuthenticationToken"
 	}
-
+	for key, value := range c.Spec.Broker.ConfigData {
+		data[key] = value
+	}
 	return
 }
 
 func MakeConfigMapName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-broker-configmap", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.BrokerComponent)
 }

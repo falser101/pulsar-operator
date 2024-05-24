@@ -30,7 +30,7 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 			SubPath:   "log4j2.yaml",
 		},
 	}
-	if c.Spec.Authentication.Enabled {
+	if c.Spec.Auth.AuthenticationEnabled {
 		volumeMounts = append(volumeMounts,
 			v1.VolumeMount{
 				Name:      "token-keys",
@@ -96,7 +96,9 @@ func makeContainerCommand() []string {
 
 func makeContainerCommandArgs() []string {
 	return []string{
-		"bin/apply-config-from-env.py conf/proxy.conf; echo 'OK' > status; bin/pulsar proxy;",
+		`bin/apply-config-from-env.py conf/proxy.conf;
+		echo 'OK' > status;
+		bin/pulsar proxy;`,
 	}
 }
 
@@ -116,13 +118,13 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 }
 
 func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
-	froms := make([]v1.EnvFromSource, 0)
-
-	var configRef v1.ConfigMapEnvSource
-	configRef.Name = MakeConfigMapName(c)
-
-	froms = append(froms, v1.EnvFromSource{ConfigMapRef: &configRef})
-	return froms
+	return []v1.EnvFromSource{
+		{
+			ConfigMapRef: &v1.ConfigMapEnvSource{
+				LocalObjectReference: v1.LocalObjectReference{Name: MakeConfigMapName(c)},
+			},
+		},
+	}
 }
 
 func makeLog4j2Name(c *v1alpha1.PulsarCluster) string {
@@ -142,7 +144,7 @@ func makeVolumes(c *v1alpha1.PulsarCluster) []v1.Volume {
 			},
 		},
 	}
-	if c.Spec.Authentication.Enabled {
+	if c.Spec.Auth.AuthenticationEnabled {
 		volumes = append(volumes,
 			v1.Volume{
 				Name: "token-keys",

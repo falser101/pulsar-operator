@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
+	"github.com/falser101/pulsar-operator/internal/component/bookie"
 	"github.com/falser101/pulsar-operator/internal/component/broker"
 	"github.com/falser101/pulsar-operator/internal/component/zookeeper"
 	v1 "k8s.io/api/batch/v1"
@@ -33,7 +34,7 @@ func MakeInitClusterMetaDataJob(c *v1alpha1.PulsarCluster) *v1.Job {
 }
 
 func MakeInitClusterMetaDataJobName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-init-cluster-metadata-job", c.GetName())
+	return fmt.Sprintf("%s-init-cluster-metadata-job", c.Name)
 }
 
 func makeJobSpec(c *v1alpha1.PulsarCluster) v1.JobSpec {
@@ -45,28 +46,40 @@ func makeJobSpec(c *v1alpha1.PulsarCluster) v1.JobSpec {
 func makePodTemplate(c *v1alpha1.PulsarCluster) corev1.PodTemplateSpec {
 	return corev1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: c.GetName(),
+			GenerateName: c.Name,
 			Labels:       v1alpha1.MakeComponentLabels(c, ComponentName),
 		},
 		Spec: corev1.PodSpec{
-			InitContainers: []corev1.Container{zookeeper.MakeWaitZookeeperReadyContainer(c), makeInitContainer(c)},
-			Containers:     []corev1.Container{makeContainer(c)},
-			RestartPolicy:  corev1.RestartPolicyNever,
+			InitContainers: []corev1.Container{
+				zookeeper.MakeWaitZookeeperReadyContainer(c),
+				makePulsarBookkeeperVerifyClusteridContainer(c),
+			},
+			Containers:    []corev1.Container{makeContainer(c)},
+			RestartPolicy: corev1.RestartPolicyNever,
 		},
 	}
 }
 
-func makeInitContainer(c *v1alpha1.PulsarCluster) corev1.Container {
+func makePulsarBookkeeperVerifyClusteridContainer(c *v1alpha1.PulsarCluster) corev1.Container {
 	return corev1.Container{
-		Name:            JobInitContainerName,
+		Name:            "pulsar-bookkeeper-verify-clusterid",
 		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
 		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
 		Command:         makeContainerCommand(),
-		Args:            makeInitContainerCommandArgs(c),
+		Args:            makePulsarBookkeeperVerifyClusteridContainerCommandArgs(c),
+		EnvFrom: []corev1.EnvFromSource{
+			{
+				ConfigMapRef: &corev1.ConfigMapEnvSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: bookie.MakeConfigMapName(c),
+					},
+				},
+			},
+		},
 	}
 }
 
-func makeInitContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
+func makePulsarBookkeeperVerifyClusteridContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
 	return []string{
 		`bin/apply-config-from-env.py conf/bookkeeper.conf;
 		until bin/bookkeeper shell whatisinstanceid; do
@@ -100,7 +113,7 @@ func makeContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
 		brokerServiceName, c.Namespace, v1alpha1.ServiceDomain, v1alpha1.PulsarBrokerPulsarServerPort)
 	return []string{
 		"bin/pulsar initialize-cluster-metadata " +
-			fmt.Sprintf("--cluster %s ", c.GetName()) +
+			fmt.Sprintf("--cluster %s ", c.Name) +
 			fmt.Sprintf("--zookeeper %s ", zookeeper.MakeServiceName(c)) +
 			fmt.Sprintf("--configuration-store %s ", zookeeper.MakeServiceName(c)) +
 			fmt.Sprintf(" --web-service-url %s/ ", webServiceUrl) +

@@ -73,7 +73,7 @@ var _ = Describe("PulsarCluster Controller", func() {
 				Scheme: k8sClient.Scheme(),
 			}
 
-		_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())

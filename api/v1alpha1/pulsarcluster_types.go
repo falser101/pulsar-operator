@@ -50,16 +50,12 @@ type PulsarClusterSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	AutoRecovery AutoRecovery `json:"autoRecovery,omitempty"`
 
-	// Manager defines the desired state of Manager
+	// Toolset defines the desired state of Proxy
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	Manager Manager `json:"manager,omitempty"`
-
-	// Monitor defines the desired state of Monitor
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	Monitor Monitor `json:"monitor,omitempty"`
+	Toolset Toolset `json:"toolset,omitempty"`
 
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	Authentication Authentication `json:"authentication,omitempty"`
+	Auth Auth `json:"authentication,omitempty"`
 }
 
 func (s *PulsarClusterSpec) SetDefault(c *PulsarCluster) bool {
@@ -76,13 +72,10 @@ func (s *PulsarClusterSpec) SetDefault(c *PulsarCluster) bool {
 	if s.AutoRecovery.SetDefault(c) {
 		changed = true
 	}
-	if s.Manager.SetDefault(c) {
-		changed = true
-	}
-	if s.Monitor.SetDefault(c) {
-		changed = true
-	}
 	if s.Proxy.SetDefault(c) {
+		changed = true
+	}
+	if s.Toolset.SetDefault(c) {
 		changed = true
 	}
 	return changed

@@ -27,7 +27,7 @@ func MakeStatefulSet(c *v1alpha1.PulsarCluster) *appsv1.StatefulSet {
 }
 
 func MakeStatefulSetName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-zookeeper-statefulset", c.GetName())
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }
 
 func makeStatefulSetPodNameList(c *v1alpha1.PulsarCluster) []string {
@@ -60,7 +60,7 @@ func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 func makeStatefulSetPodTemplate(c *v1alpha1.PulsarCluster) v1.PodTemplateSpec {
 	return v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: c.GetName(),
+			GenerateName: c.Name,
 			Labels:       v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 			Annotations:  StatefulSetAnnotations,
 		},

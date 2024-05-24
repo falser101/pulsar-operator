@@ -18,16 +18,21 @@ type Bookie struct {
 	// Updating the pod does not take effect on any existing pods.
 	Pod PodPolicy `json:"pod,omitempty"`
 
+	// ConfigData is the configuration data for bookie
+	ConfigData map[string]string `json:"configData,omitempty"`
+
 	// Storage class name
 	//
 	// PVC of storage class name
-	StorageClassName string `json:"storageClassName,omitempty"`
+	JournalStorageClassName string `json:"journalStorageClassName,omitempty"`
 
 	// Storage request capacity(Gi unit) for journal
-	JournalStorageCapacity int32 `json:"journalStorageCapacity,omitempty"`
+	JournalStorageCapacity string `json:"journalStorageCapacity,omitempty"`
+
+	LedgersStorageClassName string `json:"ledgersStorageClassName,omitempty"`
 
 	// Storage request capacity(Gi unit) for ledgers
-	LedgersStorageCapacity int32 `json:"ledgersStorageCapacity,omitempty"`
+	LedgersStorageCapacity string `json:"ledgersStorageCapacity,omitempty"`
 }
 
 func (b *Bookie) SetDefault(cluster *PulsarCluster) bool {
@@ -46,12 +51,12 @@ func (b *Bookie) SetDefault(cluster *PulsarCluster) bool {
 		changed = true
 	}
 
-	if b.StorageClassName != "" && b.JournalStorageCapacity == 0 {
+	if b.JournalStorageClassName != "" && b.JournalStorageCapacity == "" {
 		b.JournalStorageCapacity = JournalStorageDefaultCapacity
 		changed = true
 	}
 
-	if b.StorageClassName != "" && b.LedgersStorageCapacity == 0 {
+	if b.LedgersStorageClassName != "" && b.LedgersStorageCapacity == "" {
 		b.LedgersStorageCapacity = LedgersStorageDefaultCapacity
 		changed = true
 	}

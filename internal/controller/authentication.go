@@ -14,7 +14,7 @@ import (
 )
 
 func (r *PulsarClusterReconciler) reconcileAuthentication(c *v1alpha1.PulsarCluster) (err error) {
-	if !c.Spec.Authentication.Enabled {
+	if !c.Spec.Auth.AuthenticationEnabled {
 		return
 	}
 	for _, fun := range []reconcileFunc{
