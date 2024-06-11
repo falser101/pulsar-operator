@@ -40,13 +40,13 @@ func makeStatefulSetPodNameList(c *v1alpha1.PulsarCluster) []string {
 
 func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 	var spec = appsv1.StatefulSetSpec{
-		ServiceName: MakeServiceName(c),
+		PodManagementPolicy: appsv1.ParallelPodManagement,
+		ServiceName:         MakeServiceName(c),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 		},
-		Replicas:            &c.Spec.Zookeeper.Replicas,
-		Template:            makeStatefulSetPodTemplate(c),
-		PodManagementPolicy: appsv1.OrderedReadyPodManagement,
+		Replicas: &c.Spec.Zookeeper.Replicas,
+		Template: makeStatefulSetPodTemplate(c),
 		UpdateStrategy: appsv1.StatefulSetUpdateStrategy{
 			Type: appsv1.RollingUpdateStatefulSetStrategyType,
 		},
@@ -60,7 +60,6 @@ func makeStatefulSetSpec(c *v1alpha1.PulsarCluster) appsv1.StatefulSetSpec {
 func makeStatefulSetPodTemplate(c *v1alpha1.PulsarCluster) v1.PodTemplateSpec {
 	return v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: c.Name,
 			Labels:       v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 			Annotations:  StatefulSetAnnotations,
 		},

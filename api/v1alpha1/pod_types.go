@@ -42,6 +42,8 @@ type PodPolicy struct {
 	// give for a pod instance to shutdown normally.
 	// The default value is 1800.
 	TerminationGracePeriodSeconds int64 `json:"terminationGracePeriodSeconds,omitempty"`
+
+	RestartPolicy corev1.RestartPolicy `json:"restartPolicy,omitempty"`
 }
 
 func (p *PodPolicy) SetDefault(cluster *PulsarCluster, component string) bool {

@@ -25,11 +25,10 @@ func makeVolumeClaimTemplates(c *v1alpha1.PulsarCluster) []v1.PersistentVolumeCl
 }
 
 func makeZookeeperDataVolumeClaimSpec(c *v1alpha1.PulsarCluster) v1.PersistentVolumeClaimSpec {
-	capacity := fmt.Sprintf("%dGi", c.Spec.Zookeeper.StorageCapacity)
 	return v1.PersistentVolumeClaimSpec{
 		AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce},
-		Resources:        v1.VolumeResourceRequirements{Requests: v1.ResourceList{v1.ResourceStorage: resource.MustParse(capacity)}},
-		StorageClassName: &c.Spec.Zookeeper.StorageClassName,
+		Resources:        v1.VolumeResourceRequirements{Requests: v1.ResourceList{v1.ResourceStorage: resource.MustParse(c.Spec.Zookeeper.Volumes.Data.Capacity)}},
+		StorageClassName: &c.Spec.Zookeeper.Volumes.Data.StorageClassName,
 	}
 }
 

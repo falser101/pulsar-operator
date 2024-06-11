@@ -18,24 +18,23 @@ type Zookeeper struct {
 	Pod PodPolicy `json:"pod,omitempty"`
 
 	// zk ports
-	Ports ZkPorts `json:"ports,omitempty"`
+	Ports ZKPorts `json:"ports,omitempty"`
 
 	ConfigData map[string]string `json:"configData,omitempty"`
 
-	// Storage class name
-	//
-	// PVC of storage class name
-	StorageClassName string `json:"storageClassName,omitempty"`
-
-	StorageCapacity string `json:"storageCapacity,omitempty"`
+	Volumes ZKVolumes `json:"volumes,omitempty"`
 }
 
-type ZkPorts struct {
+type ZKPorts struct {
 	Http           int32 `json:"http,omitempty"`
 	Client         int32 `json:"client,omitempty"`
 	ClientTls      int32 `json:"clientTls,omitempty"`
 	Follower       int32 `json:"follower,omitempty"`
 	LeaderElection int32 `json:"leaderElection,omitempty"`
+}
+
+type ZKVolumes struct {
+	Data PVC `json:"data,omitempty"`
 }
 
 func (z *Zookeeper) SetDefault(c *PulsarCluster) bool {
@@ -50,11 +49,6 @@ func (z *Zookeeper) SetDefault(c *PulsarCluster) bool {
 		changed = true
 	}
 
-	if z.StorageClassName != "" && z.StorageCapacity == "" {
-		z.StorageCapacity = ZookeeperClusterDefaultStorageCapacity
-		changed = true
-	}
-
 	if z.Pod.SetDefault(c, ZookeeperComponent) {
 		changed = true
 	}
@@ -63,10 +57,6 @@ func (z *Zookeeper) SetDefault(c *PulsarCluster) bool {
 		changed = true
 	}
 
-	if z.ConfigData == nil {
-		z.ConfigData = make(map[string]string)
-		changed = true
-	}
 	return changed
 }
 
@@ -78,11 +68,6 @@ func (z *Zookeeper) setPortsDefault(c *PulsarCluster) (changed bool) {
 
 	if z.Ports.Client == 0 {
 		z.Ports.Client = 2181
-		changed = true
-	}
-
-	if z.Ports.ClientTls == 0 {
-		z.Ports.ClientTls = 2281
 		changed = true
 	}
 

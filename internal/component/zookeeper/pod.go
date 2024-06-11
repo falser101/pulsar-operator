@@ -40,6 +40,8 @@ func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	var p = v1.PodSpec{
 		Affinity:           c.Spec.Zookeeper.Pod.Affinity,
 		ServiceAccountName: makeSerserviceAccountName(c),
+		SecurityContext:    c.Spec.Zookeeper.Pod.SecurityContext,
+		RestartPolicy:      c.Spec.Zookeeper.Pod.RestartPolicy,
 		Containers:         []v1.Container{makeContainer(c)},
 	}
 	if isUseEmptyDirVolume(c) {
@@ -93,25 +95,30 @@ func makeContainerCommandArgs() []string {
 		`bin/apply-config-from-env.py conf/zookeeper.conf;
 		bin/apply-config-from-env.py conf/pulsar_env.sh;
 		bin/generate-zookeeper-config.sh conf/zookeeper.conf;
-		bin/pulsar zookeeper;`,
+		OPTS="${OPTS} -Dlog4j2.formatMsgNoLookups=true" exec bin/pulsar zookeeper;`,
 	}
 }
 
 func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
-			Name:          "client",
-			ContainerPort: v1alpha1.ZookeeperContainerClientDefaultPort,
+			Name:          "http",
+			ContainerPort: c.Spec.Zookeeper.Ports.Http,
 			Protocol:      v1.ProtocolTCP,
 		},
 		{
-			Name:          "server",
-			ContainerPort: v1alpha1.ZookeeperContainerServerDefaultPort,
+			Name:          "client",
+			ContainerPort: c.Spec.Zookeeper.Ports.Client,
+			Protocol:      v1.ProtocolTCP,
+		},
+		{
+			Name:          "follower",
+			ContainerPort: c.Spec.Zookeeper.Ports.Follower,
 			Protocol:      v1.ProtocolTCP,
 		},
 		{
 			Name:          "leader-election",
-			ContainerPort: v1alpha1.ZookeeperContainerLeaderElectionPort,
+			ContainerPort: c.Spec.Zookeeper.Ports.LeaderElection,
 			Protocol:      v1.ProtocolTCP,
 		},
 	}
@@ -122,6 +129,10 @@ func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
 		{
 			Name:  ContainerZookeeperServerList,
 			Value: strings.Join(makeStatefulSetPodNameList(c), ","),
+		},
+		{
+			Name:  "EXTERNAL_PROVIDED_SERVERS",
+			Value: "false",
 		},
 	}
 }
@@ -139,7 +150,7 @@ func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 }
 
 func isUseEmptyDirVolume(c *v1alpha1.PulsarCluster) bool {
-	return c.Spec.Zookeeper.StorageClassName == ""
+	return c.Spec.Zookeeper.Volumes.Data.StorageClassName == ""
 }
 
 func MakeWaitZookeeperReadyContainer(c *v1alpha1.PulsarCluster) v1.Container {
@@ -156,6 +167,6 @@ func makeWaitZookeeperReadyContainerCommandArgs(c *v1alpha1.PulsarCluster) []str
 	return []string{
 		fmt.Sprintf(`until nslookup %s.%s.%s.svc.cluster.local; do
 		sleep 3;
-	  done;`, fmt.Sprintf("%s-%d", MakeStatefulSetName(c), c.Spec.Zookeeper.Replicas-1), MakeServiceName(c), c.Namespace),
+		done;`, fmt.Sprintf("%s-%d", MakeStatefulSetName(c), c.Spec.Zookeeper.Replicas-1), MakeServiceName(c), c.Namespace),
 	}
 }

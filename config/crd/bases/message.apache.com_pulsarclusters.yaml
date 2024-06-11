@@ -41,12 +41,22 @@ spec:
             properties:
               authentication:
                 properties:
-                  enabled:
+                  authenticationEnabled:
                     description: Authentication is the authentication policy for the
                       broker cluster.
                     type: boolean
-                  provider:
+                  authenticationProvider:
                     type: string
+                  authorizationEnabled:
+                    type: boolean
+                  proxyRoles:
+                    items:
+                      type: string
+                    type: array
+                  superUserRoles:
+                    items:
+                      type: string
+                    type: array
                 type: object
               autoRecovery:
                 description: AutoRecovery defines the desired state of AutoRecovery
@@ -1214,6 +1224,13 @@ spec:
                           eligible to run on a node, the node must have each of the indicated
                           key-value pairs as labels.
                         type: object
+                      restartPolicy:
+                        description: |-
+                          RestartPolicy describes how the container should be restarted.
+                          Only one of the following restart policies may be specified.
+                          If none of the following policies is specified, the default one
+                          is RestartPolicyAlways.
+                        type: string
                       securityContext:
                         description: |-
                           SecurityContext specifies the security context for the entire pod
@@ -1471,6 +1488,11 @@ spec:
               bookie:
                 description: Bookie defines the desired state of Bookie
                 properties:
+                  configData:
+                    additionalProperties:
+                      type: string
+                    description: ConfigData is the configuration data for bookie
+                    type: object
                   image:
                     description: Image is the  container image. default is apachepulsar/pulsar-all:latest
                     properties:
@@ -2649,6 +2671,13 @@ spec:
                           eligible to run on a node, the node must have each of the indicated
                           key-value pairs as labels.
                         type: object
+                      restartPolicy:
+                        description: |-
+                          RestartPolicy describes how the container should be restarted.
+                          Only one of the following restart policies may be specified.
+                          If none of the following policies is specified, the default one
+                          is RestartPolicyAlways.
+                        type: string
                       securityContext:
                         description: |-
                           SecurityContext specifies the security context for the entire pod
@@ -4076,6 +4105,13 @@ spec:
                           eligible to run on a node, the node must have each of the indicated
                           key-value pairs as labels.
                         type: object
+                      restartPolicy:
+                        description: |-
+                          RestartPolicy describes how the container should be restarted.
+                          Only one of the following restart policies may be specified.
+                          If none of the following policies is specified, the default one
+                          is RestartPolicyAlways.
+                        type: string
                       securityContext:
                         description: |-
                           SecurityContext specifies the security context for the entire pod
@@ -5510,6 +5546,13 @@ spec:
                           eligible to run on a node, the node must have each of the indicated
                           key-value pairs as labels.
                         type: object
+                      restartPolicy:
+                        description: |-
+                          RestartPolicy describes how the container should be restarted.
+                          Only one of the following restart policies may be specified.
+                          If none of the following policies is specified, the default one
+                          is RestartPolicyAlways.
+                        type: string
                       securityContext:
                         description: |-
                           SecurityContext specifies the security context for the entire pod
@@ -6933,6 +6976,13 @@ spec:
                           eligible to run on a node, the node must have each of the indicated
                           key-value pairs as labels.
                         type: object
+                      restartPolicy:
+                        description: |-
+                          RestartPolicy describes how the container should be restarted.
+                          Only one of the following restart policies may be specified.
+                          If none of the following policies is specified, the default one
+                          is RestartPolicyAlways.
+                        type: string
                       securityContext:
                         description: |-
                           SecurityContext specifies the security context for the entire pod
@@ -7191,6 +7241,10 @@ spec:
               zookeeper:
                 description: Zookeeper defines the desired state of Zookeeper
                 properties:
+                  configData:
+                    additionalProperties:
+                      type: string
+                    type: object
                   image:
                     description: Image is the  container image. default is apachepulsar/pulsar-all:latest
                     properties:
@@ -8354,6 +8408,13 @@ spec:
                           eligible to run on a node, the node must have each of the indicated
                           key-value pairs as labels.
                         type: object
+                      restartPolicy:
+                        description: |-
+                          RestartPolicy describes how the container should be restarted.
+                          Only one of the following restart policies may be specified.
+                          If none of the following policies is specified, the default one
+                          is RestartPolicyAlways.
+                        type: string
                       securityContext:
                         description: |-
                           SecurityContext specifies the security context for the entire pod
@@ -8607,30 +8668,35 @@ spec:
                     description: zk ports
                     properties:
                       client:
-                        type: string
+                        format: int32
+                        type: integer
                       clientTls:
-                        type: string
+                        format: int32
+                        type: integer
                       follower:
-                        type: string
+                        format: int32
+                        type: integer
                       http:
-                        type: string
+                        format: int32
+                        type: integer
                       leaderElection:
-                        type: string
+                        format: int32
+                        type: integer
                     type: object
                   replicas:
                     description: Replicas is the expected size of the broker cluster.
                     format: int32
                     type: integer
-                  storageCapacity:
-                    format: int32
-                    type: integer
-                  storageClassName:
-                    description: |-
-                      Storage class name
-
-
-                      PVC of storage class name
-                    type: string
+                  volumes:
+                    properties:
+                      data:
+                        properties:
+                          capacity:
+                            type: string
+                          storageClassName:
+                            type: string
+                        type: object
+                    type: object
                 type: object
             type: object
           status:
