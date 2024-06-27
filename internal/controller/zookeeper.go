@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	"github.com/falser101/pulsar-operator/internal/component/zookeeper"
@@ -16,7 +17,7 @@ import (
 func (r *PulsarClusterReconciler) reconcileZookeeper(c *v1alpha1.PulsarCluster) error {
 	for _, fun := range []reconcileFunc{
 		r.reconcileZookeeperConfigMap,
-		r.reconcileZookeeperServiceAccount,
+		r.reconcileZookeeperRBAC,
 		r.reconcileZookeeperStatefulSet,
 		r.reconcileZookeeperService,
 		r.reconcileZookeeperPodDisruptionBudget,
@@ -51,6 +52,19 @@ func (r *PulsarClusterReconciler) reconcileZookeeperConfigMap(c *v1alpha1.Pulsar
 	return
 }
 
+func (r *PulsarClusterReconciler) reconcileZookeeperRBAC(c *v1alpha1.PulsarCluster) (err error) {
+	if err = r.reconcileZookeeperServiceAccount(c); err != nil {
+		return
+	}
+	if err = r.reconcileZookeeperRole(c); err != nil {
+		return
+	}
+	if err = r.reconcileZookeeperRoleBinding(c); err != nil {
+		return
+	}
+	return
+}
+
 func (r *PulsarClusterReconciler) reconcileZookeeperServiceAccount(c *v1alpha1.PulsarCluster) (err error) {
 	saCreate := zookeeper.MakeServiceAccount(c)
 	saCur := &v1.ServiceAccount{}
@@ -67,6 +81,48 @@ func (r *PulsarClusterReconciler) reconcileZookeeperServiceAccount(c *v1alpha1.P
 			r.log.Info("Create pulsar zookeeper service account success",
 				"ServiceAccount.Namespace", c.Namespace,
 				"ServiceAccount.Name", saCreate.GetName())
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileZookeeperRole(c *v1alpha1.PulsarCluster) (err error) {
+	roleCreate := zookeeper.MakeRole(c)
+	roleCur := &rbacv1.Role{}
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Name:      roleCreate.Name,
+		Namespace: roleCreate.Namespace,
+	}, roleCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, roleCreate, r.Scheme); err != nil {
+			return err
+		}
+
+		if err = r.Create(context.TODO(), roleCreate); err == nil {
+			r.log.Info("Create pulsar zookeeper role success",
+				"Role.Namespace", c.Namespace,
+				"Role.Name", roleCreate.GetName())
+		}
+	}
+	return
+}
+
+func (r *PulsarClusterReconciler) reconcileZookeeperRoleBinding(c *v1alpha1.PulsarCluster) (err error) {
+	rbCreate := zookeeper.MakeRoleBinding(c)
+	rbCur := &rbacv1.RoleBinding{}
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Name:      rbCreate.Name,
+		Namespace: rbCreate.Namespace,
+	}, rbCur)
+	if err != nil && errors.IsNotFound(err) {
+		if err = controllerutil.SetControllerReference(c, rbCreate, r.Scheme); err != nil {
+			return err
+		}
+
+		if err = r.Create(context.TODO(), rbCreate); err == nil {
+			r.log.Info("Create pulsar zookeeper roleBinding success",
+				"RoleBinding.Namespace", c.Namespace,
+				"RoleBinding.Name", rbCreate.GetName())
 		}
 	}
 	return
