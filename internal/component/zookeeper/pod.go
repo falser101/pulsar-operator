@@ -37,12 +37,14 @@ func MakePodDisruptionBudgetName(c *v1alpha1.PulsarCluster) string {
 }
 
 func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
+	var periodSeconds int64 = 30
 	var p = v1.PodSpec{
-		Affinity:           c.Spec.Zookeeper.Pod.Affinity,
-		ServiceAccountName: makeName(c),
-		SecurityContext:    c.Spec.Zookeeper.Pod.SecurityContext,
-		RestartPolicy:      c.Spec.Zookeeper.Pod.RestartPolicy,
-		Containers:         []v1.Container{makeContainer(c)},
+		Affinity:                      c.Spec.Zookeeper.Pod.Affinity,
+		TerminationGracePeriodSeconds: &periodSeconds,
+		ServiceAccountName:            MakeName(c),
+		SecurityContext:               c.Spec.Zookeeper.Pod.SecurityContext,
+		RestartPolicy:                 c.Spec.Zookeeper.Pod.RestartPolicy,
+		Containers:                    []v1.Container{makeContainer(c)},
 	}
 	if isUseEmptyDirVolume(c) {
 		p.Volumes = makeEmptyDirVolume(c)
@@ -52,7 +54,7 @@ func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 
 func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 	return v1.Container{
-		Name:            "zookeeper",
+		Name:            MakeName(c),
 		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
 		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
 		Command:         makeContainerCommand(),
@@ -60,24 +62,34 @@ func makeContainer(c *v1alpha1.PulsarCluster) v1.Container {
 		Ports:           makeContainerPort(c),
 		Env:             makeContainerEnv(c),
 		EnvFrom:         makeContainerEnvFrom(c),
-
-		ReadinessProbe: &v1.Probe{
-			InitialDelaySeconds: 5,
-			TimeoutSeconds:      5,
-			ProbeHandler:        v1.ProbeHandler{Exec: &v1.ExecAction{Command: []string{ReadinessProbeScript}}},
-		},
-		LivenessProbe: &v1.Probe{
-			InitialDelaySeconds: 15,
-			TimeoutSeconds:      5,
-			ProbeHandler: v1.ProbeHandler{
-				Exec: &v1.ExecAction{Command: []string{LivenessProbeScript}},
-			},
-		},
-
+		Resources:       c.Spec.Zookeeper.Pod.Resources,
+		ReadinessProbe:  makeProbe(c),
+		LivenessProbe:   makeProbe(c),
+		StartupProbe:    makeProbe(c),
 		VolumeMounts: []v1.VolumeMount{
 			{
-				Name:      makeZookeeperDateVolumeName(c),
-				MountPath: ContainerDataPath,
+				Name:      makeDataVolumeName(c),
+				MountPath: "/pulsar/data",
+			},
+		},
+	}
+}
+
+func makeProbe(c *v1alpha1.PulsarCluster) *v1.Probe {
+	return &v1.Probe{
+		InitialDelaySeconds: 20,
+		PeriodSeconds:       30,
+		TimeoutSeconds:      30,
+		FailureThreshold:    10,
+		ProbeHandler: v1.ProbeHandler{
+			Exec: &v1.ExecAction{
+				Command: []string{
+					"timeout",
+					"30",
+					"bash",
+					"-c",
+					fmt.Sprintf("{ echo ruok; sleep 1; } | nc 127.0.0.1 %d | grep imok", c.Spec.Zookeeper.Ports.Client),
+				},
 			},
 		},
 	}
@@ -93,7 +105,6 @@ func makeContainerCommand() []string {
 func makeContainerCommandArgs() []string {
 	return []string{
 		`bin/apply-config-from-env.py conf/zookeeper.conf;
-		bin/apply-config-from-env.py conf/pulsar_env.sh;
 		bin/generate-zookeeper-config.sh conf/zookeeper.conf;
 		OPTS="${OPTS} -Dlog4j2.formatMsgNoLookups=true" exec bin/pulsar zookeeper;`,
 	}
@@ -127,7 +138,7 @@ func makeContainerPort(c *v1alpha1.PulsarCluster) []v1.ContainerPort {
 func makeContainerEnv(c *v1alpha1.PulsarCluster) []v1.EnvVar {
 	return []v1.EnvVar{
 		{
-			Name:  ContainerZookeeperServerList,
+			Name:  "ZOOKEEPER_SERVERS",
 			Value: strings.Join(makeStatefulSetPodNameList(c), ","),
 		},
 		{
@@ -142,7 +153,7 @@ func makeContainerEnvFrom(c *v1alpha1.PulsarCluster) []v1.EnvFromSource {
 		{
 			ConfigMapRef: &v1.ConfigMapEnvSource{
 				LocalObjectReference: v1.LocalObjectReference{
-					Name: MakeConfigMapName(c),
+					Name: MakeName(c),
 				},
 			},
 		},
@@ -158,15 +169,24 @@ func MakeWaitZookeeperReadyContainer(c *v1alpha1.PulsarCluster) v1.Container {
 		Name:            "wait-zookeeper-ready",
 		Image:           c.Spec.Zookeeper.Image.GenerateImage(),
 		ImagePullPolicy: c.Spec.Zookeeper.Image.PullPolicy,
-		Command:         makeContainerCommand(),
-		Args:            makeWaitZookeeperReadyContainerCommandArgs(c),
+		Command:         makeWaitZookeeperReadyContainerCommand(c),
+		Args:            makeWaitZookeeperReadyContainerArgs(c),
 	}
 }
 
-func makeWaitZookeeperReadyContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
+func makeWaitZookeeperReadyContainerCommand(c *v1alpha1.PulsarCluster) []string {
 	return []string{
-		fmt.Sprintf(`until nslookup %s.%s.%s.svc.cluster.local; do
+		"timeout",
+		"600",
+		"sh",
+		"-c",
+	}
+}
+
+func makeWaitZookeeperReadyContainerArgs(c *v1alpha1.PulsarCluster) []string {
+	return []string{
+		fmt.Sprintf(`until nslookup %s.%s.%s; do
 		sleep 3;
-		done;`, fmt.Sprintf("%s-%d", MakeStatefulSetName(c), c.Spec.Zookeeper.Replicas-1), MakeServiceName(c), c.Namespace),
+		done;`, fmt.Sprintf("%s-%d", MakeName(c), c.Spec.Zookeeper.Replicas-1), MakeName(c), c.Namespace),
 	}
 }

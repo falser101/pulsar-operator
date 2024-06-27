@@ -215,7 +215,7 @@ func (r *PulsarClusterReconciler) reconcileZookeeperPodDisruptionBudget(c *v1alp
 func (r *PulsarClusterReconciler) isZookeeperRunning(c *v1alpha1.PulsarCluster) bool {
 	ss := &appsv1.StatefulSet{}
 	err := r.Get(context.TODO(), types.NamespacedName{
-		Name:      zookeeper.MakeStatefulSetName(c),
+		Name:      zookeeper.MakeName(c),
 		Namespace: c.Namespace,
 	}, ss)
 	if err == nil {

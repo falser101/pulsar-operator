@@ -1,8 +1,6 @@
 package zookeeper
 
 import (
-	"fmt"
-
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 
 	v1 "k8s.io/api/core/v1"
@@ -24,13 +22,9 @@ func MakeConfigMap(c *v1alpha1.PulsarCluster) *v1.ConfigMap {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      MakeConfigMapName(c),
+			Name:      MakeName(c),
 			Namespace: c.Namespace,
 		},
 		Data: data,
 	}
-}
-
-func MakeConfigMapName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }

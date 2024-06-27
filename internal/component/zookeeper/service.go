@@ -16,7 +16,7 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        MakeServiceName(c),
+			Name:        MakeName(c),
 			Namespace:   c.Namespace,
 			Labels:      v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 			Annotations: ServiceAnnotations,
@@ -28,10 +28,6 @@ func MakeService(c *v1alpha1.PulsarCluster) *v1.Service {
 			Selector:                 v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 		},
 	}
-}
-
-func MakeServiceName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }
 
 func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
@@ -56,9 +52,9 @@ func makeServicePorts(c *v1alpha1.PulsarCluster) []v1.ServicePort {
 }
 
 func Connect(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s:%s", MakeServiceName(c), c.Spec.Zookeeper.Ports.Client)
+	return fmt.Sprintf("%s:%s", MakeName(c), c.Spec.Zookeeper.Ports.Client)
 }
 
 func Hostname(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("${HOSTNAME}.%s.%s.svc.cluster.local", MakeServiceName(c), c.Namespace)
+	return fmt.Sprintf("${HOSTNAME}.%s.%s.svc.cluster.local", MakeName(c), c.Namespace)
 }

@@ -1,7 +1,6 @@
 package zookeeper
 
 import (
-	"fmt"
 	"github.com/falser101/pulsar-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -15,15 +14,11 @@ func MakeServiceAccount(c *v1alpha1.PulsarCluster) *corev1.ServiceAccount {
 			Kind:       "ServiceAccount",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      makeName(c),
+			Name:      MakeName(c),
 			Namespace: c.Namespace,
 			Labels:    v1alpha1.MakeComponentLabels(c, v1alpha1.ZookeeperComponent),
 		},
 	}
-}
-
-func makeName(c *v1alpha1.PulsarCluster) string {
-	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }
 
 func MakeRole(c *v1alpha1.PulsarCluster) *rbacv1.Role {
@@ -33,7 +28,7 @@ func MakeRole(c *v1alpha1.PulsarCluster) *rbacv1.Role {
 			Kind:       "Role",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      makeName(c),
+			Name:      MakeName(c),
 			Namespace: c.Namespace,
 		},
 		Rules: []rbacv1.PolicyRule{},
@@ -47,18 +42,18 @@ func MakeRoleBinding(c *v1alpha1.PulsarCluster) *rbacv1.RoleBinding {
 			Kind:       "RoleBinding",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      makeName(c),
+			Name:      MakeName(c),
 			Namespace: c.Namespace,
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "Role",
-			Name:     makeName(c),
+			Name:     MakeName(c),
 		},
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:      "ServiceAccount",
-				Name:      makeName(c),
+				Name:      MakeName(c),
 				Namespace: c.Namespace,
 			},
 		},

@@ -13,9 +13,8 @@ import (
 )
 
 const (
-	JobContainerName     = "pulsar-cluster-metadata-job"
-	JobInitContainerName = JobContainerName + "-init"
-	ComponentName        = "init-cluster-metadata-job"
+	JobContainerName = "pulsar-cluster-metadata-job"
+	ComponentName    = "init-cluster-metadata-job"
 )
 
 func MakeInitClusterMetaDataJob(c *v1alpha1.PulsarCluster) *v1.Job {
@@ -25,7 +24,7 @@ func MakeInitClusterMetaDataJob(c *v1alpha1.PulsarCluster) *v1.Job {
 			APIVersion: "batch/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      MakeInitClusterMetaDataJobName(c),
+			Name:      makeInitClusterMetaDataJobName(c),
 			Namespace: c.Namespace,
 			Labels:    v1alpha1.MakeComponentLabels(c, ComponentName),
 		},
@@ -33,7 +32,7 @@ func MakeInitClusterMetaDataJob(c *v1alpha1.PulsarCluster) *v1.Job {
 	}
 }
 
-func MakeInitClusterMetaDataJobName(c *v1alpha1.PulsarCluster) string {
+func makeInitClusterMetaDataJobName(c *v1alpha1.PulsarCluster) string {
 	return fmt.Sprintf("%s-init-cluster-metadata-job", c.Name)
 }
 
@@ -114,8 +113,8 @@ func makeContainerCommandArgs(c *v1alpha1.PulsarCluster) []string {
 	return []string{
 		"bin/pulsar initialize-cluster-metadata " +
 			fmt.Sprintf("--cluster %s ", c.Name) +
-			fmt.Sprintf("--zookeeper %s ", zookeeper.MakeServiceName(c)) +
-			fmt.Sprintf("--configuration-store %s ", zookeeper.MakeServiceName(c)) +
+			fmt.Sprintf("--zookeeper %s ", zookeeper.MakeName(c)) +
+			fmt.Sprintf("--configuration-store %s ", zookeeper.MakeName(c)) +
 			fmt.Sprintf(" --web-service-url %s/ ", webServiceUrl) +
 			fmt.Sprintf("--broker-service-url %s/ ", brokerServiceUrl) +
 			"|| true;",

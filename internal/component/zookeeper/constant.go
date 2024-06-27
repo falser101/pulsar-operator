@@ -1,26 +1,8 @@
 package zookeeper
 
-const (
-	// PulsarMemData Mem
-	PulsarMemData = " -Xms100m -Xmx256m "
-
-	// PulsarGCData GC
-	PulsarGCData = " -XX:+UseG1GC -XX:MaxGCPauseMillis=10"
-
-	// ContainerZookeeperServerList Container zookeeper server list env key
-	ContainerZookeeperServerList = "ZOOKEEPER_SERVERS"
-
-	// ContainerDataVolumeName Container data volume name
-	ContainerDataVolumeName = "datadir"
-
-	// ContainerDataPath Container zookeeper data path
-	ContainerDataPath = "/pulsar/data"
-
-	// ReadinessProbeScript ReadinessProbe script
-	ReadinessProbeScript = "bin/pulsar-zookeeper-ruok.sh"
-
-	// LivenessProbeScript LivenessProbe script
-	LivenessProbeScript = "bin/pulsar-zookeeper-ruok.sh"
+import (
+	"fmt"
+	"github.com/falser101/pulsar-operator/api/v1alpha1"
 )
 
 // ServiceAnnotations Annotations
@@ -37,4 +19,8 @@ func init() {
 	StatefulSetAnnotations["pod.alpha.kubernetes.io/initialized"] = "true"
 	StatefulSetAnnotations["prometheus.io/scrape"] = "true"
 	StatefulSetAnnotations["prometheus.io/port"] = "8000"
+}
+
+func MakeName(c *v1alpha1.PulsarCluster) string {
+	return fmt.Sprintf("%s-%s", c.Name, v1alpha1.ZookeeperComponent)
 }
