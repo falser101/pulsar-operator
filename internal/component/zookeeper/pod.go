@@ -39,7 +39,7 @@ func MakePodDisruptionBudgetName(c *v1alpha1.PulsarCluster) string {
 func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	var p = v1.PodSpec{
 		Affinity:           c.Spec.Zookeeper.Pod.Affinity,
-		ServiceAccountName: makeServiceAccountName(c),
+		ServiceAccountName: makeName(c),
 		SecurityContext:    c.Spec.Zookeeper.Pod.SecurityContext,
 		RestartPolicy:      c.Spec.Zookeeper.Pod.RestartPolicy,
 		Containers:         []v1.Container{makeContainer(c)},
