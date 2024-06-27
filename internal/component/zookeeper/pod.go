@@ -13,7 +13,7 @@ import (
 )
 
 func MakePodDisruptionBudget(c *v1alpha1.PulsarCluster) *policyv1.PodDisruptionBudget {
-	count := intstr.FromInt(1)
+	count := intstr.FromInt32(1)
 	return &policyv1.PodDisruptionBudget{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "PodDisruptionBudget",
@@ -39,7 +39,7 @@ func MakePodDisruptionBudgetName(c *v1alpha1.PulsarCluster) string {
 func makePodSpec(c *v1alpha1.PulsarCluster) v1.PodSpec {
 	var p = v1.PodSpec{
 		Affinity:           c.Spec.Zookeeper.Pod.Affinity,
-		ServiceAccountName: makeSerserviceAccountName(c),
+		ServiceAccountName: makeServiceAccountName(c),
 		SecurityContext:    c.Spec.Zookeeper.Pod.SecurityContext,
 		RestartPolicy:      c.Spec.Zookeeper.Pod.RestartPolicy,
 		Containers:         []v1.Container{makeContainer(c)},
